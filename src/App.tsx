@@ -172,7 +172,7 @@ function ProfilePage({
     { name: 'Nane', color: '#b4eeb4' },
     { name: 'Gül', color: '#ffb4ab' },
     { name: 'Altın', color: '#efc06d' },
-    { name: 'Gümüş', color: '#c4c6d0' },
+    { name: 'Beyaz', color: '#ffffff' },
   ];
 
   const bgThemes = [

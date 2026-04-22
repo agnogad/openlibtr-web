@@ -14,7 +14,7 @@
   --color-brand-surface-variant: var(--surface-variant-color, #2a2a2a);
   --color-brand-card: var(--card-color, #141414);
   --color-brand-border: var(--border-color, #333333);
-  --color-brand-primary: var(--primary-color, #c4c6d0);
+  --color-brand-primary: var(--primary-color, #ffffff);
   --color-brand-primary-container: var(--primary-container-color, #333333);
   --color-brand-on-primary-container: var(--on-primary-container-color, #ffffff);
   --color-brand-text-main: #e6e1e5;
