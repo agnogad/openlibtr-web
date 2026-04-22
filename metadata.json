@@ -1,6 +1,6 @@
 {
   "name": "OKUTTUR",
-  "description": "Modern, dark-themed Light Novel reader platform with markdown support and reading history.",
+  "description": "Modern, karanlık temalı ve akıcı bir Light Novel okuma platformu. Okuma geçmişi, kaldığın yerden devam etme ve kişiselleştirilebilir görünüm ayarları ile en iyi okuma deneyimi.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

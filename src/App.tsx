@@ -730,6 +730,9 @@ function NovelDetails() {
     ]).then(([conf, nav]) => {
       setConfig(conf);
       setNovel(nav || null);
+      if (nav) {
+        document.title = `${nav.title} | OKUTTUR`;
+      }
       setHistory(storage.getHistory());
       setResume(storage.getResume());
       setLoading(false);
@@ -934,6 +937,7 @@ function Reader({ session }: { session: Session | null }) {
           setChapter(content);
           setLoading(false);
           if (nav) {
+            document.title = `${nav.title} - Bölüm ${chapterId} | OKUTTUR`;
             const historyItem = {
               slug,
               novelTitle: nav.title,
@@ -1265,6 +1269,35 @@ function Reader({ session }: { session: Session | null }) {
   );
 }
 
+// --- Dynamic Title Helper ---
+
+function DynamicTitle() {
+  const location = useLocation();
+  
+  useEffect(() => {
+    const path = location.pathname;
+    let title = 'OKUTTUR | Modern Light Novel Platformu';
+    
+    if (path === '/') {
+      title = 'OKUTTUR | Keşfet';
+    } else if (path === '/history') {
+      title = 'OKUTTUR | Okuma Geçmişi';
+    } else if (path === '/profile') {
+      title = 'OKUTTUR | Profilim';
+    } else if (path === '/login') {
+      title = 'OKUTTUR | Giriş Yap';
+    } else if (path.startsWith('/novel/')) {
+      title = 'OKUTTUR | Novel Detayları';
+    } else if (path.startsWith('/read/')) {
+      title = 'OKUTTUR | Okunuyor';
+    }
+    
+    document.title = title;
+  }, [location]);
+
+  return null;
+}
+
 // --- App Root ---
 
 export default function App() {
@@ -1311,6 +1344,7 @@ export default function App() {
 
   return (
     <Router>
+      <DynamicTitle />
       <div className="min-h-screen flex flex-col bg-brand-bg text-brand-text-main selection:bg-brand-primary/30 pb-28 lg:pb-0 overflow-x-hidden relative">
         <div className="noise-overlay" />
         <Header search={search} setSearch={setSearch} />
