@@ -827,6 +827,9 @@ function Reader({ session }: { session: Session | null }) {
   const [readerSettings, setReaderSettings] = useState<ReadingSettings>(storage.getReadingSettings());
   const [showSettings, setShowSettings] = useState(false);
   const [showChapters, setShowChapters] = useState(false);
+  const [chapterSearch, setChapterSearch] = useState('');
+  const [chapterPage, setChapterPage] = useState(1);
+  const quickPageSize = 60;
 
   useEffect(() => {
     if (!slug || !chapterId) return;
@@ -889,23 +892,31 @@ function Reader({ session }: { session: Session | null }) {
 
   const htmlContent = DOMPurify.sanitize(marked.parse(chapter) as string);
 
+  const filteredQuickChapters = config.chapters.filter(ch => 
+    ch.id.toString().includes(chapterSearch) || 
+    ch.id.toString() === chapterSearch
+  );
+
+  const quickTotalPages = Math.ceil(filteredQuickChapters.length / quickPageSize);
+  const paginatedQuickChapters = filteredQuickChapters.slice((chapterPage - 1) * quickPageSize, chapterPage * quickPageSize);
+
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
       <nav className="glass-header h-16 flex items-center shrink-0 border-b border-brand-border/20">
-        <div className="container mx-auto px-4 flex items-center justify-between">
+        <div className="container mx-auto px-2 sm:px-4 flex items-center justify-between gap-2">
           <Link 
             to={`/novel/${slug}`}
-            className="flex items-center gap-2 p-2 rounded-full hover:bg-brand-surface-variant/30 transition-all"
+            className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full hover:bg-brand-surface-variant/30 transition-all"
           >
             <ArrowLeft className="w-6 h-6 text-brand-text-main" />
           </Link>
           
-          <div className="flex-1 px-4 text-center">
-            <h2 className="text-sm font-lexend font-bold text-white truncate">{novel.title}</h2>
-            <p className="text-[11px] text-brand-primary font-bold uppercase tracking-widest leading-none mt-1">BÖLÜM {chapterId}</p>
+          <div className="flex-1 min-w-0 px-2 text-center">
+            <h2 className="text-xs sm:text-sm font-lexend font-bold text-white truncate max-w-[180px] sm:max-w-none mx-auto">{novel.title}</h2>
+            <p className="text-[10px] sm:text-[11px] text-brand-primary font-bold uppercase tracking-widest leading-none mt-1">BÖLÜM {chapterId}</p>
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             <button 
               onClick={() => setShowChapters(!showChapters)}
               className={cn(
@@ -933,17 +944,42 @@ function Reader({ session }: { session: Session | null }) {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="absolute top-16 left-0 right-0 z-40 bg-brand-surface border-b border-brand-border/30 shadow-xl"
+              className="absolute top-16 left-0 right-0 z-40 bg-brand-surface border-b border-brand-border/30 shadow-2xl"
             >
-              <div className="container mx-auto p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-sm font-lexend font-bold text-white uppercase tracking-wider">Hızlı Erişim</h3>
-                  <button onClick={() => setShowChapters(false)} className="p-2 rounded-full hover:bg-brand-surface-variant/30">
-                    <X className="w-5 h-5 text-brand-text-muted" />
-                  </button>
+              <div className="container mx-auto p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-sm font-lexend font-bold text-white uppercase tracking-wider">Hızlı Erişim</h3>
+                    <span className="text-[10px] bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full font-bold">
+                      {filteredQuickChapters.length} BÖLÜM
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
+                      <input 
+                        type="text"
+                        placeholder="Bölüm Ara..."
+                        value={chapterSearch}
+                        onChange={(e) => {
+                          setChapterSearch(e.target.value);
+                          setChapterPage(1);
+                        }}
+                        className="bg-brand-surface-variant/20 border-none rounded-full py-2 pl-9 pr-4 text-xs text-white placeholder:text-brand-text-muted focus:ring-1 focus:ring-brand-primary/30 transition-all font-lexend w-40 sm:w-60"
+                      />
+                    </div>
+                    <button onClick={() => setShowChapters(false)} className="p-2 rounded-full hover:bg-brand-surface-variant/30 hidden sm:block">
+                      <X className="w-5 h-5 text-brand-text-muted" />
+                    </button>
+                    <button onClick={() => setShowChapters(false)} className="sm:hidden p-2 text-brand-text-muted">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-3 max-h-[50vh] overflow-y-auto pr-2">
-                  {config.chapters.map((ch) => {
+
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-10 lg:grid-cols-12 gap-2 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {paginatedQuickChapters.map((ch) => {
                     const isCurrent = ch.id === parseInt(chapterId!);
                     return (
                       <Link
@@ -951,17 +987,45 @@ function Reader({ session }: { session: Session | null }) {
                         to={`/read/${slug}/${ch.id}`}
                         onClick={() => setShowChapters(false)}
                         className={cn(
-                          "aspect-square flex items-center justify-center rounded-xl border text-xs font-bold transition-all",
+                          "aspect-square flex items-center justify-center rounded-lg border text-xs font-bold transition-all",
                           isCurrent
-                            ? "bg-brand-primary text-brand-bg border-brand-primary"
-                            : "bg-brand-surface-variant/10 text-brand-text-muted border-brand-border/40 hover:border-brand-primary/40 hover:text-white"
+                            ? "bg-brand-primary text-brand-bg border-brand-primary shadow-sm"
+                            : "bg-brand-surface-variant/5 text-brand-text-muted border-brand-border/40 hover:border-brand-primary/40 hover:text-white"
                         )}
                       >
                         {ch.id}
                       </Link>
                     )
                   })}
+
+                  {filteredQuickChapters.length === 0 && (
+                    <div className="col-span-full py-10 text-center">
+                      <p className="text-brand-text-muted font-lexend text-sm">Bölüm bulunamadı.</p>
+                    </div>
+                  )}
                 </div>
+
+                {quickTotalPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-6 pt-4 border-t border-brand-border/10">
+                    <button 
+                      disabled={chapterPage === 1}
+                      onClick={() => setChapterPage(p => p - 1)}
+                      className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 hover:text-brand-primary transition-all"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">
+                      SAYFA {chapterPage} / {quickTotalPages}
+                    </span>
+                    <button 
+                      disabled={chapterPage === quickTotalPages}
+                      onClick={() => setChapterPage(p => p + 1)}
+                      className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 hover:text-brand-primary transition-all"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
