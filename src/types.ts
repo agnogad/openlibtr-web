@@ -37,4 +37,5 @@ export interface ReadingSettings {
 
 export interface AppearanceSettings {
   primaryColor: string;
+  theme: 'material' | 'pitch' | 'deep' | 'forest';
 }

@@ -48,6 +48,6 @@ export const storage = {
 
   getAppearanceSettings: (): AppearanceSettings => {
     const data = localStorage.getItem(APPEARANCE_SETTINGS_KEY);
-    return data ? JSON.parse(data) : { primaryColor: '#38bdf8' };
+    return data ? JSON.parse(data) : { primaryColor: '#c4c6d0', theme: 'pitch' };
   }
 };
