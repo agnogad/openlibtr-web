@@ -281,7 +281,7 @@ function Header({ search, setSearch }: { search: string, setSearch: (s: string) 
         <Link to="/" className="flex items-center gap-3 group shrink-0">
           <div className="w-3 h-3 bg-brand-primary rounded-[2px] shadow-[0_0_10px_rgba(56,189,248,0.5)]" />
           <span className="text-lg font-bold tracking-tighter text-white uppercase">
-            OPENLIB.TR
+            OKUTTUR
           </span>
         </Link>
         
@@ -756,7 +756,7 @@ function Reader({ session }: { session: Session | null }) {
       
       <footer className="py-12 border-t border-brand-border bg-brand-surface/20 text-center">
         <p className="text-[10px] font-bold tracking-widest text-brand-text-muted uppercase">
-          &copy; 2026 OpenLib TR &bull; Dark Reader Experience
+          &copy; 2026 OKUTTUR &bull; Dark Reader Experience
         </p>
       </footer>
     </div>
@@ -828,7 +828,7 @@ export default function App() {
 
         <footer className={cn("py-12 border-t border-brand-border text-center hidden lg:block", !session && "block")}>
           <p className="text-[10px] font-bold tracking-widest text-brand-text-muted uppercase">
-            &copy; 2026 OpenLib TR &bull; Developed by AI
+            &copy; 2026 OKUTTUR &bull; Developed by AI
           </p>
         </footer>
       </div>

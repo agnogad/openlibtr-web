@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "openlibtr",
+    "site": "okuttur",
     "public": "dist",
     "ignore": [
       "firebase.json",
