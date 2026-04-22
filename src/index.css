@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --font-inter: "Inter", sans-serif;
+  --font-serif: "Lora", serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-brand-bg: #09090b;
+  --color-brand-surface: #18181b;
+  --color-brand-card: #18181b;
+  --color-brand-border: #27272a;
+  --color-brand-primary: var(--primary-color, #38bdf8);
+  --color-brand-text-main: #fafafa;
+  --color-brand-text-muted: #a1a1aa;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-brand-text-main antialiased font-sans;
+  }
+}
+
+.markdown-body {
+  @apply leading-relaxed text-lg;
+}
+
+.markdown-body p {
+  @apply mb-6 last:mb-0;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3 {
+  @apply font-semibold mt-8 mb-4 text-white;
+}
+
+.markdown-body hr {
+  @apply border-brand-border my-8;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@layer utilities {
+  .glass-header {
+    @apply sticky top-0 z-40 w-full border-b border-brand-border bg-brand-bg/80 backdrop-blur-md;
+  }
+}
