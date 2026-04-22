@@ -1,0 +1,112 @@
+name: 🚀 Deploy React → Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main        # production deploy
+      - develop     # preview deploy (isteğe bağlı)
+  pull_request:
+    branches:
+      - main        # PR preview channel
+
+env:
+  NODE_VERSION: '20'
+  BUILD_DIR: build   # Vite kullananlar için: dist
+
+jobs:
+  # ──────────────────────────────────────────────
+  # 1) BUILD
+  # ──────────────────────────────────────────────
+  build:
+    name: 🔨 Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (varsa)
+        run: npm test -- --watchAll=false --passWithNoTests
+
+      - name: Build
+        run: npm run build
+        env:
+          # .env.production içindeki değişkenlere ek olarak
+          # Secrets'tan da ortam değişkeni aktarabilirsiniz:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          # Vite kullananlar için: VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-build
+          path: ${{ env.BUILD_DIR }}
+          retention-days: 1
+
+  # ──────────────────────────────────────────────
+  # 2a) PRODUCTION DEPLOY  (sadece main branch)
+  # ──────────────────────────────────────────────
+  deploy-production:
+    name: 🌐 Deploy → Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    environment:
+      name: production
+      url: https://${{ secrets.FIREBASE_PROJECT_ID }}.web.app
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-build
+          path: ${{ env.BUILD_DIR }}
+
+      - name: Deploy to Firebase Hosting (Live)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
+
+  # ──────────────────────────────────────────────
+  # 2b) PREVIEW DEPLOY  (PR'lar için)
+  # ──────────────────────────────────────────────
+  deploy-preview:
+    name: 🔍 Deploy → Preview Channel
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: react-build
+          path: ${{ env.BUILD_DIR }}
+
+      - name: Deploy to Firebase Hosting (Preview)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          # Her PR için benzersiz bir önizleme kanalı açar
+          # ve URL'yi PR yorumu olarak bırakır
