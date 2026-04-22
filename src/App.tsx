@@ -305,7 +305,7 @@ function BottomNav({ session }: { session: Session | null }) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-brand-surface border-t border-brand-border/30 h-20 md:hidden flex items-center justify-around px-2 shadow-lg">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-brand-surface border-t border-brand-border/30 h-20 md:hidden flex items-center justify-around px-2 shadow-2xl">
       {navItems.map((item) => {
         const isActive = location.pathname === item.path;
         return (
@@ -333,7 +333,15 @@ function BottomNav({ session }: { session: Session | null }) {
   );
 }
 
-function SideNav({ session }: { session: Session | null }) {
+function SideNav({ 
+  session, 
+  isCollapsed, 
+  setIsCollapsed 
+}: { 
+  session: Session | null, 
+  isCollapsed: boolean, 
+  setIsCollapsed: (c: boolean) => void 
+}) {
   const location = useLocation();
   const menuItems = [
     { name: 'Ana Sayfa', path: '/', icon: Home },
@@ -342,14 +350,47 @@ function SideNav({ session }: { session: Session | null }) {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col gap-4 w-72 p-6 h-screen sticky top-0 overflow-y-auto">
-      <div className="mt-4 mb-8 px-4">
-        <Link to="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg">
+    <aside 
+      className={cn(
+        "hidden md:flex flex-col gap-4 p-4 h-screen sticky top-0 overflow-y-auto transition-all duration-300 border-r border-brand-border/10 bg-brand-bg/50 backdrop-blur-xl",
+        isCollapsed ? "w-24" : "w-72"
+      )}
+    >
+      <div className={cn("mt-4 mb-8 flex items-center h-10", isCollapsed ? "justify-center" : "px-4 justify-between")}>
+        <AnimatePresence mode="wait">
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="flex items-center gap-3 overflow-hidden"
+            >
+              <Link to="/" className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg shrink-0">
+                  <Book className="w-5 h-5 text-brand-bg" />
+                </div>
+                <span className="text-xl font-lexend font-bold text-white tracking-tight whitespace-nowrap">OKUTTUR</span>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {isCollapsed && (
+          <Link to="/" className="w-9 h-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg shrink-0">
             <Book className="w-5 h-5 text-brand-bg" />
-          </div>
-          <span className="text-xl font-lexend font-bold text-white tracking-tight">OKUTTUR</span>
-        </Link>
+          </Link>
+        )}
+
+        {/* Collapse Toggle */}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={cn(
+            "p-2 rounded-full hover:bg-brand-surface-variant/20 transition-all",
+            isCollapsed && "mt-4"
+          )}
+        >
+          <Menu className="w-5 h-5 text-brand-text-muted" />
+        </button>
       </div>
 
       <div className="space-y-1">
@@ -360,32 +401,48 @@ function SideNav({ session }: { session: Session | null }) {
               key={item.name}
               to={item.path}
               className={cn(
-                "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-lexend font-medium transition-all group",
+                "flex items-center gap-4 px-4 py-3 rounded-full text-[15px] font-lexend font-medium transition-all group relative",
                 isActive
                   ? "bg-brand-primary/10 text-brand-primary shadow-sm"
-                  : "text-brand-text-muted hover:bg-brand-surface-variant/20 hover:text-brand-text-main"
+                  : "text-brand-text-muted hover:bg-brand-surface-variant/20 hover:text-brand-text-main",
+                isCollapsed && "justify-center px-0 w-12 mx-auto"
               )}
             >
               <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
-              {item.name}
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="whitespace-nowrap"
+                >
+                  {item.name}
+                </motion.span>
+              )}
+              {isCollapsed && (
+                <div className="absolute left-full ml-4 px-3 py-1.5 bg-brand-surface border border-brand-border/30 rounded-lg text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
+                  {item.name}
+                </div>
+              )}
             </Link>
           );
         })}
       </div>
 
-      <div className="mt-auto px-4 py-6 border-t border-brand-border/20">
-        <div className="flex items-center gap-4">
+      <div className={cn("mt-auto py-6 border-t border-brand-border/20", isCollapsed ? "px-0" : "px-4")}>
+        <div className={cn("flex items-center gap-4", isCollapsed ? "justify-center" : "")}>
           <div className="w-10 h-10 rounded-full bg-brand-surface-variant flex items-center justify-center shrink-0 border border-brand-border/30">
             <User className="w-5 h-5 text-brand-text-main" />
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-lexend font-medium text-white truncate">
-              {session ? session.user.email : 'Misafir Kullanıcı'}
-            </span>
-            <span className="text-[11px] font-lexend text-brand-text-muted uppercase tracking-widest">
-              {session ? 'Oturum Açık' : 'Oturum Açın'}
-            </span>
-          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-lexend font-medium text-white truncate">
+                {session ? session.user.email : 'Misafir Kullanıcı'}
+              </span>
+              <span className="text-[11px] font-lexend text-brand-text-muted uppercase tracking-widest leading-none">
+                {session ? 'Oturum Açık' : 'Oturum Açın'}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </aside>
@@ -410,20 +467,6 @@ function Header({ search, setSearch }: { search: string, setSearch: (s: string) 
         <Link to="/profile" className="p-2 rounded-full hover:bg-brand-surface-variant/30 transition-colors">
           <User className="text-brand-text-main w-6 h-6" />
         </Link>
-      </div>
-      
-      {/* Desktop Search stays in Header for consistency or moved to Top Bar if preferred */}
-      <div className="hidden md:flex flex-1 max-w-2xl mx-auto px-6 py-10">
-        <div className="w-full relative group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-text-muted w-5 h-5 group-focus-within:text-brand-primary transition-colors z-10" />
-          <input 
-            type="text"
-            placeholder="Novel kütüphanesinde keşfe çıkın..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-brand-surface-variant/20 border border-transparent rounded-full py-4 pl-14 pr-6 text-base text-brand-text-main placeholder:text-brand-text-muted/60 focus:outline-none focus:border-brand-primary/30 focus:bg-brand-surface-variant/40 transition-all font-lexend relative z-10 shadow-sm"
-          />
-        </div>
       </div>
     </header>
   );
@@ -483,16 +526,16 @@ function Library({ search, setSearch }: { search: string, setSearch: (s: string)
           <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{novels.length} TOPLAM</span>
         </div>
 
-        {/* Mobile Search - Integration for Material Design 3 */}
-        <div className="md:hidden mb-10">
+        {/* Search Bar - Repositioned for all screen sizes */}
+        <div className="mb-10 max-w-2xl">
           <div className="relative group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-text-muted w-5 h-5" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-text-muted w-5 h-5 group-focus-within:text-brand-primary transition-colors" />
             <input 
               type="text"
-              placeholder="Keşfet..."
+              placeholder="Novel kütüphanesinde keşfe çıkın..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-brand-surface-variant/20 border-none rounded-2xl py-4 pl-14 pr-6 text-base text-brand-text-main placeholder:text-brand-text-muted focus:ring-0 transition-all font-lexend"
+              className="w-full bg-brand-surface-variant/20 border-none rounded-2xl py-4 pl-14 pr-6 text-base text-brand-text-main placeholder:text-brand-text-muted/60 focus:ring-2 focus:ring-brand-primary/20 transition-all font-lexend"
             />
           </div>
         </div>
@@ -1147,6 +1190,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [appearance, setAppearance] = useState<AppearanceSettings>(storage.getAppearanceSettings());
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -1189,8 +1233,12 @@ export default function App() {
         <div className="noise-overlay" />
         <Header search={search} setSearch={setSearch} />
         
-        <div className="flex-1 flex w-full max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 overflow-hidden">
-          <SideNav session={session} />
+        <div className="flex-1 flex w-full max-w-[1700px] mx-auto px-3 sm:px-6 lg:px-8 overflow-hidden">
+          <SideNav 
+            session={session} 
+            isCollapsed={isSidebarCollapsed} 
+            setIsCollapsed={setIsSidebarCollapsed} 
+          />
           
           <main className={cn("flex-1 p-0 sm:p-5 md:p-10 overflow-hidden min-w-0")}>
             <div className="p-3 sm:p-0 h-full overflow-y-auto overflow-x-hidden hide-scrollbar">
