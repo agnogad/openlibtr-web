@@ -21,21 +21,50 @@
   --color-brand-text-muted: #938f99;
 
   --animate-spin-slow: spin 8s linear infinite;
+  --animate-bounce-gentle: bounce-gentle 3s ease-in-out infinite;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
 }
 
 @layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-brand-border) transparent;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-brand-border);
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-brand-text-muted);
+  }
+
   body {
     @apply bg-brand-bg text-brand-text-main antialiased font-sans selection:bg-brand-primary/30 overflow-x-hidden;
   }
 }
 
 .noise-overlay {
-  display: none; /* Material Design is cleaner, removing noise */
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: overlay;
 }
 
 .markdown-body {
@@ -66,11 +95,11 @@
 
 /* Material Elevation Surfaces */
 .m3-card {
-  @apply bg-brand-surface rounded-[28px] border-none shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden;
+  @apply bg-brand-surface rounded-[28px] border border-brand-border/10 shadow-sm hover:shadow-xl hover:bg-brand-surface-variant/5 transition-all duration-500 relative overflow-hidden;
 }
 
 .m3-card-elevated {
-  @apply bg-brand-card rounded-[28px] shadow-md hover:shadow-lg transition-shadow duration-300;
+  @apply bg-brand-card rounded-[28px] shadow-md hover:shadow-2xl transition-all duration-500 border border-brand-border/10;
 }
 
 @layer utilities {

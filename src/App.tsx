@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Book, History as HistoryIcon, Search, ArrowLeft, ChevronRight, ChevronLeft, Bookmark, Home, User, Settings, ExternalLink, LogOut, LogIn, Menu, X, Check, Play, Clock, MessageSquare } from 'lucide-react';
+import { Book, History as HistoryIcon, Search, ArrowLeft, ArrowUp, ChevronRight, ChevronLeft, Bookmark, Home, User, Settings, ExternalLink, LogOut, LogIn, Menu, X, Check, Play, Clock, MessageSquare, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Novel, HistoryItem, ResumeData, NovelConfig, ReadingSettings, AppearanceSettings } from './types';
 import { api } from './services/api';
@@ -56,6 +56,15 @@ const THEME_CONFIGS = {
     primaryContainer: '#14532d',
     onPrimaryContainer: '#dcfce7'
   }
+};
+
+// --- Helpers ---
+
+const calculateReadingTime = (text: string) => {
+  const wordsPerMinute = 200;
+  const words = text.trim().split(/\s+/).length;
+  const time = Math.ceil(words / wordsPerMinute);
+  return { time, words };
 };
 
 // --- Auth Component ---
@@ -408,7 +417,13 @@ function SideNav({
                 isCollapsed && "justify-center px-0 w-12 mx-auto"
               )}
             >
-              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+               {isCollapsed && isActive && (
+                <motion.div 
+                  layoutId="activeGlow"
+                  className="absolute inset-0 bg-brand-primary/20 rounded-full blur-md"
+                />
+              )}
+              <item.icon className="relative z-10 w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
               {!isCollapsed && (
                 <motion.span
                   initial={{ opacity: 0 }}
@@ -549,6 +564,20 @@ function Library({ search, setSearch }: { search: string, setSearch: (s: string)
               </div>
             ))}
           </div>
+        ) : filteredNovels.length === 0 ? (
+          <div className="py-32 text-center">
+            <Search className="w-16 h-16 text-brand-text-muted mx-auto mb-6 opacity-20" />
+            <h3 className="text-xl font-lexend font-bold text-white mb-2">Sonuç Bulunamadı</h3>
+            <p className="text-brand-text-muted font-lexend text-sm max-w-xs mx-auto">
+              "{search}" ile eşleşen bir novel bulamadık. Başka bir anahtar kelime deneyebilirsiniz.
+            </p>
+            <button 
+              onClick={() => setSearch('')}
+              className="mt-8 px-8 py-2 rounded-full border border-brand-primary text-brand-primary text-sm font-bold hover:bg-brand-primary/10 transition-all font-lexend"
+            >
+              Aramayı Sıfırla
+            </button>
+          </div>
         ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8">
           {filteredNovels.map((novel, idx) => (
@@ -562,15 +591,15 @@ function Library({ search, setSearch }: { search: string, setSearch: (s: string)
                 to={`/novel/${novel.slug}`}
                 className="group flex flex-col"
               >
-                <div className="m3-card aspect-[10/14] mb-4 overflow-hidden shadow-md group-hover:shadow-xl group-hover:-translate-y-1 transition-all">
+                <div className="m3-card aspect-[10/14] mb-4 overflow-hidden group-hover:-translate-y-2 group-hover:rotate-1 transition-all duration-500 ease-out">
                   <img 
                     src={api.getCoverUrl(novel.slug)} 
                     alt={novel.title} 
-                    className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-bg/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <div className="absolute bottom-4 left-0 right-0 text-center opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all">
-                    <span className="px-4 py-2 bg-brand-primary text-brand-bg text-[11px] font-bold rounded-full">İNCELE</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/20 to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+                  <div className="absolute bottom-6 left-0 right-0 text-center opacity-0 group-hover:opacity-100 translate-y-6 group-hover:translate-y-0 transition-all duration-500 delay-75">
+                    <span className="px-6 py-2.5 bg-brand-primary text-brand-bg text-[12px] font-black rounded-full shadow-xl">OKUMAYA BAŞLA</span>
                   </div>
                 </div>
                 <h3 className="font-lexend font-bold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
@@ -872,7 +901,21 @@ function Reader({ session }: { session: Session | null }) {
   const [showChapters, setShowChapters] = useState(false);
   const [chapterSearch, setChapterSearch] = useState('');
   const [chapterPage, setChapterPage] = useState(1);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const quickPageSize = 60;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (window.scrollY / totalHeight) * 100;
+      setScrollProgress(progress);
+      setShowBackToTop(window.scrollY > 500);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!slug || !chapterId) return;
@@ -934,6 +977,7 @@ function Reader({ session }: { session: Session | null }) {
   const nextCh = config.chapters[currentIdx + 1];
 
   const htmlContent = DOMPurify.sanitize(marked.parse(chapter) as string);
+  const { time, words } = calculateReadingTime(chapter);
 
   const filteredQuickChapters = config.chapters.filter(ch => 
     ch.id.toString().includes(chapterSearch) || 
@@ -945,7 +989,13 @@ function Reader({ session }: { session: Session | null }) {
 
   return (
     <div className="min-h-screen bg-brand-bg flex flex-col">
-      <nav className="glass-header h-16 flex items-center shrink-0 border-b border-brand-border/20">
+      {/* Scroll Progress Bar */}
+      <div 
+        className="fixed top-0 left-0 h-1 bg-brand-primary z-[60] transition-all duration-150" 
+        style={{ width: `${scrollProgress}%` }}
+      />
+      
+      <nav className="glass-header h-16 flex items-center shrink-0 border-b border-brand-border/20 content-visibility-auto">
         <div className="container mx-auto px-2 sm:px-4 flex items-center justify-between gap-2">
           <Link 
             to={`/novel/${slug}`}
@@ -1129,7 +1179,24 @@ function Reader({ session }: { session: Session | null }) {
         </AnimatePresence>
       </nav>
 
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-2xl">
+      <main className="flex-1 container mx-auto px-4 py-12 max-w-2xl relative">
+        {/* Reading Meta */}
+        <div className="flex items-center justify-between mb-8 px-2">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-widest">
+              <Clock className="w-3.5 h-3.5 text-brand-primary" />
+              {time} Dakika Okuma
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-widest">
+              <Book className="w-3.5 h-3.5 text-brand-primary" />
+              {words} Kelime
+            </div>
+          </div>
+          <div className="text-[10px] sm:text-xs font-mono text-brand-primary/60">
+            {Math.round(scrollProgress)}% BİTTİ
+          </div>
+        </div>
+
         <article 
           className={cn(
             "markdown-body transition-all leading-relaxed",
@@ -1179,6 +1246,21 @@ function Reader({ session }: { session: Session | null }) {
           &copy; 2026 OKUTTUR &bull; Dark Mode Material Experience
         </p>
       </footer>
+
+      {/* Back to Top */}
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.5, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.5, y: 20 }}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="fixed bottom-24 right-6 sm:bottom-10 sm:right-10 w-12 h-12 bg-brand-primary text-brand-bg rounded-full shadow-2xl flex items-center justify-center z-40 hover:brightness-110 active:scale-90 transition-all border-4 border-brand-bg"
+          >
+            <ArrowUp className="w-6 h-6" />
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
