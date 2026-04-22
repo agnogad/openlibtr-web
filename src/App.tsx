@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { Book, History, Search, ArrowLeft, ChevronRight, Bookmark, Home, User, Settings, ExternalLink, LogOut, LogIn } from 'lucide-react';
+import { Book, History, Search, ArrowLeft, ChevronRight, ChevronLeft, Bookmark, Home, User, Settings, ExternalLink, LogOut, LogIn, Menu, X, Check, Play } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Novel, HistoryItem, ResumeData, NovelConfig, ReadingSettings, AppearanceSettings } from './types';
 import { api } from './services/api';
@@ -26,14 +26,8 @@ function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isConfigured = !supabase.auth.getSession().then(({ data }) => data).catch(() => false) || (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_URL !== 'https://placeholder.supabase.co');
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project-id')) {
-      setError('Lütfen önce Supabase URL ve Key bilgilerinizi Secrets panelinden (Ayarlar) ekleyin.');
-      return;
-    }
     setLoading(true);
     setError(null);
     try {
@@ -53,60 +47,75 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 relative overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-primary/5 rounded-full blur-[120px] pointer-events-none" />
+      
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md p-8 rounded-3xl bg-brand-surface border border-brand-border shadow-2xl"
+        className="w-full max-w-md p-10 rounded-[2.5rem] bg-[#0a0a0a] border border-brand-border shadow-[0_30px_70px_rgba(0,0,0,0.5)] relative z-10"
       >
-        <h2 className="text-2xl font-bold text-white mb-2 text-center">
-          {isSignUp ? 'Kayıt Ol' : 'Giriş Yap'}
-        </h2>
-        <p className="text-brand-text-muted text-center mb-8 text-sm">
-          Okuma listenizi senkronize etmek için devam edin.
-        </p>
+        <div className="text-center mb-10">
+          <div className="w-16 h-16 bg-brand-primary/10 border border-brand-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 transform rotate-3">
+             <LogIn className="w-8 h-8 text-brand-primary" />
+          </div>
+          <h2 className="text-3xl font-display font-bold text-white mb-2 italic">
+            {isSignUp ? 'Katıl' : 'Hoş Geldin'}
+          </h2>
+          <p className="text-brand-text-muted text-xs font-medium uppercase tracking-[2px]">
+            {isSignUp ? 'YENI BIR MACERAYA BAŞLAYIN' : 'OKUMAYA DEVAM ETMEK IÇIN GIRIŞ YAPIN'}
+          </p>
+        </div>
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-brand-text-muted mb-2">E-posta</label>
+        <form onSubmit={handleAuth} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-[3px] text-brand-text-muted/50 ml-4">Giriş Kimliği</label>
             <input 
               type="email" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-primary transition-colors"
-              placeholder="ornek@mail.com"
+              className="w-full bg-brand-bg border border-brand-border rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-brand-primary/50 transition-all placeholder:text-zinc-600 font-medium"
+              placeholder="E-posta adresiniz"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-widest text-brand-text-muted mb-2">Şifre</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-[3px] text-brand-text-muted/50 ml-4">Güvenlik Anahtarı</label>
             <input 
               type="password" 
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-brand-bg border border-brand-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-primary transition-colors"
+              className="w-full bg-brand-bg border border-brand-border rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-brand-primary/50 transition-all placeholder:text-zinc-600 font-medium"
               placeholder="••••••••"
             />
           </div>
 
-          {error && <p className="text-red-500 text-xs text-center">{error}</p>}
+          {error && (
+            <motion.p 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-red-400 text-[11px] font-bold text-center bg-red-400/10 py-3 rounded-xl border border-red-400/20"
+            >
+              {error}
+            </motion.p>
+          )}
 
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full py-4 bg-brand-primary text-black font-bold rounded-xl shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-all text-sm"
+            className="w-full py-5 bg-brand-primary text-black font-black uppercase text-xs tracking-[3px] rounded-2xl shadow-[0_10px_30px_rgba(56,189,248,0.2)] hover:shadow-brand-primary/30 active:scale-[0.98] transition-all disabled:opacity-50"
           >
-            {loading ? 'Yükleniyor...' : (isSignUp ? 'Kayıt Ol' : 'Giriş Yap')}
+            {loading ? 'Sistem Doğrulanıyor...' : (isSignUp ? 'Kayıt İşlemini Tamamla' : 'Sisteme Bağlan')}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <button 
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-xs text-brand-text-muted hover:text-brand-primary transition-colors"
+            className="text-[10px] font-black uppercase tracking-widest text-brand-text-muted hover:text-brand-primary transition-colors py-2"
           >
-            {isSignUp ? 'Zaten hesabınız var mı? Giriş yapın' : 'Hesabınız yok mu? Kayıt olun'}
+            {isSignUp ? 'Hesabınız var mı? Giriş Yap' : 'Henüz üye değil misiniz? Kayıt Ol'}
           </button>
         </div>
       </motion.div>
@@ -138,37 +147,40 @@ function ProfilePage({
 
   return (
     <div className="max-w-xl mx-auto py-10 px-4">
-      <div className="space-y-6">
+      <div className="space-y-10">
         {/* User Card */}
-        <div className="p-8 rounded-3xl bg-brand-surface border border-brand-border text-center">
-          <div className="w-20 h-20 bg-brand-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <User className="text-brand-primary w-10 h-10" />
+        <div className="relative group p-10 rounded-[2.5rem] bg-[#0a0a0a] border border-brand-border text-center overflow-hidden shadow-2xl">
+          <div className="absolute top-0 right-0 p-6 opacity-10 pointer-events-none">
+            <User className="w-48 h-48 text-brand-primary" strokeWidth={1} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">Profil</h2>
-          <p className="text-brand-text-muted mb-8">{session.user.email}</p>
           
-          <div className="space-y-4">
-            <Link to="/history" className="flex items-center justify-between p-4 rounded-xl bg-brand-bg border border-brand-border hover:border-brand-primary/50 transition-all">
-              <span className="text-sm font-medium">Okuma Geçmişi</span>
-              <ChevronRight className="w-4 h-4 text-brand-text-muted" />
-            </Link>
+          <div className="relative flex flex-col items-center">
+            <div className="w-24 h-24 bg-brand-primary/10 border-2 border-brand-primary/20 rounded-[2rem] flex items-center justify-center mx-auto mb-6 transform group-hover:rotate-6 transition-transform duration-500">
+              <User className="text-brand-primary w-12 h-12" />
+            </div>
+            <h2 className="text-3xl font-display font-bold text-white mb-2 italic">Kontrol Merkezi</h2>
+            <div className="flex items-center justify-center gap-2 mb-8">
+               <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-pulse" />
+               <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">{session.user.email}</p>
+            </div>
+            
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all font-bold text-sm"
+              className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-red-500 hover:border-red-500 transition-all font-black text-[10px] uppercase tracking-[2px]"
             >
               <LogOut className="w-4 h-4" />
-              Çıkış Yap
+              SİSTEMDEN AYRIL
             </button>
           </div>
         </div>
 
-        {/* Theme Card */}
-        <div className="p-8 rounded-3xl bg-brand-surface border border-brand-border">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-brand-text-muted mb-6 flex items-center gap-2">
+        {/* Theme Settings */}
+        <div className="p-8 rounded-[2rem] bg-brand-surface/30 border border-brand-border">
+          <h3 className="text-[10px] font-black uppercase tracking-[3px] text-zinc-600 mb-8 flex items-center gap-2">
             <Settings className="w-4 h-4" />
-            Görünüm Teması
+            Görünüm Arayüzü
           </h3>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {themes.map((theme) => (
               <button
                 key={theme.color}
@@ -178,27 +190,26 @@ function ProfilePage({
                   storage.saveAppearanceSettings(newSettings);
                 }}
                 className={cn(
-                  "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
+                  "relative flex flex-col items-center gap-3 p-5 rounded-2xl border-2 transition-all group overflow-hidden",
                   appearance.primaryColor === theme.color
-                    ? "border-brand-primary bg-brand-primary/10"
-                    : "border-transparent bg-brand-bg hover:border-brand-border"
+                    ? "border-brand-primary bg-brand-primary/10 shadow-[0_0_20px_rgba(56,189,248,0.1)]"
+                    : "border-brand-border bg-[#0a0a0a] hover:border-zinc-700"
                 )}
               >
                 <div 
-                  className="w-8 h-8 rounded-full shadow-lg" 
+                  className="w-5 h-5 rounded-full shadow-lg" 
                   style={{ backgroundColor: theme.color }}
                 />
-                <span className="text-[10px] font-bold uppercase tracking-tighter">{theme.name}</span>
+                <span className={cn(
+                  "text-[9px] font-black uppercase tracking-widest",
+                  appearance.primaryColor === theme.color ? "text-brand-primary" : "text-zinc-600"
+                )}>{theme.name}</span>
+                {appearance.primaryColor === theme.color && (
+                   <motion.div layoutId="activeTheme" className="absolute inset-0 bg-brand-primary/5 pointer-events-none" />
+                )}
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Info Card */}
-        <div className="p-6 rounded-3xl bg-brand-surface/30 border border-brand-border text-center">
-          <p className="text-[10px] font-bold tracking-widest text-brand-text-muted uppercase">
-            v2.3.0 Optimized &bull; AI Studio
-          </p>
         </div>
       </div>
     </div>
@@ -209,27 +220,62 @@ function ProfilePage({
 
 function BottomNav({ session }: { session: Session | null }) {
   const location = useLocation();
+  const isReader = location.pathname.startsWith('/read/');
+
+  if (isReader) return null;
+
   const navItems = [
-    { name: 'Ana Menü', path: '/', icon: Home },
+    { name: 'Keşfet', path: '/', icon: Home },
     { name: 'Geçmiş', path: '/history', icon: History },
     { name: session ? 'Profil' : 'Giriş', path: '/profile', icon: User },
   ];
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-brand-surface/80 backdrop-blur-xl border-t border-brand-border flex items-center justify-around h-20 px-6 pb-2 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-      {navItems.map((item) => (
-        <Link
-          key={item.name}
-          to={item.path}
-          className={cn(
-            "flex flex-col items-center gap-1 transition-all",
-            location.pathname === item.path ? "text-brand-primary scale-110" : "text-brand-text-muted"
-          )}
-        >
-          <item.icon className="w-6 h-6" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">{item.name}</span>
-        </Link>
-      ))}
+    <nav className="lg:hidden fixed bottom-6 left-6 right-6 z-50">
+      <div className="bg-brand-surface/90 backdrop-blur-2xl border border-brand-border h-16 rounded-2xl flex items-center justify-around px-4 shadow-[0_15px_40px_rgba(0,0,0,0.4)]">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path;
+          return (
+            <Link
+              key={item.name}
+              to={item.path}
+              className="relative flex flex-col items-center justify-center flex-1 h-full transition-all active:scale-90"
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="bottomNavIndicator"
+                  className="absolute inset-x-2 inset-y-2 bg-brand-primary/10 rounded-xl"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              
+              <div className={cn(
+                "relative z-10 flex flex-col items-center gap-0.5 transition-colors duration-300",
+                isActive ? "text-brand-primary" : "text-brand-text-muted"
+              )}>
+                <item.icon className={cn(
+                  "w-5 h-5 transition-transform duration-300",
+                  isActive && "scale-110"
+                )} strokeWidth={isActive ? 2.5 : 2} />
+                <span className={cn(
+                  "text-[9px] font-black uppercase tracking-[1.5px] leading-none mb-0.5",
+                  isActive ? "opacity-100" : "opacity-70"
+                )}>
+                  {item.name}
+                </span>
+              </div>
+
+              {isActive && (
+                <motion.div 
+                  layoutId="bottomNavDot"
+                  className="absolute -bottom-1 w-1 h-1 rounded-full bg-brand-primary"
+                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                />
+              )}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }
@@ -239,31 +285,68 @@ function SideNav({ session }: { session: Session | null }) {
   const menuItems = [
     { name: 'Ana Menü', path: '/', icon: Home },
     { name: 'Geçmiş', path: '/history', icon: History },
-    { name: session ? 'Profil' : 'Ayarlar', path: '/profile', icon: Settings },
+    { name: session ? 'Profil' : 'Giriş', path: '/profile', icon: User },
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col gap-2 w-64 p-6 border-r border-brand-border h-[calc(100vh-64px)] sticky top-16">
-      {menuItems.map((item) => (
-        <Link
-          key={item.name}
-          to={item.path}
-          className={cn(
-            "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group",
-            location.pathname === item.path
-              ? "bg-brand-surface text-brand-text-main shadow-sm border border-brand-border"
-              : "text-brand-text-muted hover:text-brand-text-main hover:bg-brand-surface/50"
+    <aside className="hidden lg:flex flex-col gap-1 w-72 p-8 border-r border-brand-border h-[calc(100vh-64px)] sticky top-16 scroll-py-8">
+      <div className="mb-10 pt-2">
+        <p className="text-[10px] font-black uppercase tracking-[3px] text-brand-text-muted/40 mb-4 ml-4">Navigasyon</p>
+        <div className="flex flex-col gap-1">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.name}
+                to={item.path}
+                className={cn(
+                  "relative flex items-center gap-4 px-5 py-3.5 rounded-2xl text-[13px] font-bold transition-all group overflow-hidden",
+                  isActive
+                    ? "bg-brand-primary/5 text-brand-primary border border-brand-primary/10 shadow-[0_0_20px_rgba(56,189,248,0.05)]"
+                    : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
+                )}
+              >
+                {isActive && (
+                  <motion.div 
+                    layoutId="sidebarActive"
+                    className="absolute left-0 top-1/2 -track-y-1/2 w-1 h-5 bg-brand-primary rounded-full"
+                  />
+                )}
+                <item.icon className={cn(
+                  "w-5 h-5 transition-transform duration-300 group-hover:scale-110",
+                  isActive ? "text-brand-primary" : "text-zinc-600 group-hover:text-brand-primary"
+                )} />
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-auto group">
+        <div className="p-5 rounded-[1.5rem] bg-brand-card/50 border border-brand-border hover:border-brand-primary/20 transition-all">
+          <div className="flex items-center gap-3 mb-3">
+             <div className="relative">
+                <div className="w-8 h-8 rounded-full bg-brand-bg border border-brand-border flex items-center justify-center">
+                  <User className="w-4 h-4 text-brand-text-muted" />
+                </div>
+                {session && <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-brand-card" />}
+             </div>
+             <div className="flex flex-col">
+               <span className="text-[10px] font-black text-zinc-100 uppercase tracking-widest leading-none">
+                 {session ? (session.user.email?.split('@')[0]) : 'Misafir'}
+               </span>
+               <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-tighter mt-1">
+                 {session ? 'PREMIUM ÜYE' : 'Kayıt Olun'}
+               </span>
+             </div>
+          </div>
+          {!session && (
+            <Link to="/login" className="block w-full py-2 bg-white/5 hover:bg-white/10 text-center rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-400 transition-all">
+              Hemen Başla
+            </Link>
           )}
-        >
-          <item.icon className={cn("w-5 h-5 transition-colors", location.pathname === item.path ? "text-brand-primary" : "text-brand-text-muted group-hover:text-brand-primary")} />
-          {item.name}
-        </Link>
-      ))}
-      <div className="mt-auto p-4 rounded-xl bg-brand-surface/30 border border-brand-border">
-        <p className="text-[10px] uppercase tracking-widest text-brand-text-muted font-bold mb-2">Durum</p>
-        <span className="text-xs text-brand-text-muted font-medium">
-          {session ? 'Giriş Yapıldı' : 'Misafir Modu'}
-        </span>
+        </div>
       </div>
     </aside>
   );
@@ -276,29 +359,29 @@ function Header({ search, setSearch }: { search: string, setSearch: (s: string) 
   if (isReader) return null;
 
   return (
-    <header className="glass-header h-16 flex items-center shrink-0">
-      <div className="container mx-auto px-6 flex items-center justify-between gap-8">
-        <Link to="/" className="flex items-center gap-3 group shrink-0">
-          <div className="w-3 h-3 bg-brand-primary rounded-[2px] shadow-[0_0_10px_rgba(56,189,248,0.5)]" />
-          <span className="text-lg font-bold tracking-tighter text-white uppercase">
+    <header className="glass-header h-16 flex items-center shrink-0 overflow-hidden">
+      <div className="w-full max-w-[1440px] mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-8">
+        <Link to="/" className="flex items-center gap-1.5 sm:gap-3 group shrink-0 min-w-0">
+          <div className="w-3.5 h-3.5 bg-brand-primary rounded-sm shadow-[0_0_15px_rgba(56,189,248,0.4)] group-hover:rotate-45 transition-transform duration-500 shrink-0" />
+          <span className="text-sm sm:text-xl font-display font-black tracking-tighter text-white uppercase italic truncate">
             OKUTTUR
           </span>
         </Link>
         
-        <div className="flex-1 max-w-md relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-text-muted w-4 h-4 group-focus-within:text-brand-primary transition-colors" />
+        <div className="flex-1 max-w-[200px] sm:max-w-md relative group min-w-0">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-brand-text-muted w-3 h-3 group-focus-within:text-brand-primary transition-colors" />
           <input 
             type="text"
-            placeholder="Novel ara..."
+            placeholder="Ara..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-brand-surface border border-brand-border rounded-lg py-2 pl-10 pr-4 text-sm text-brand-text-main placeholder:text-brand-text-muted focus:outline-none focus:border-brand-primary/50 transition-all font-sans"
+            className="w-full bg-brand-surface border border-brand-border rounded-lg py-1.5 pl-8 pr-2 text-[10px] sm:text-sm text-brand-text-main placeholder:text-brand-text-muted focus:outline-none focus:border-brand-primary/50 transition-all font-sans"
           />
         </div>
 
-        <div className="hidden lg:block">
-          <Link to="/profile" className="w-10 h-10 rounded-full bg-brand-surface border border-brand-border flex items-center justify-center hover:border-brand-primary transition-all">
-            <User className="text-brand-text-muted w-5 h-5" />
+        <div className="shrink-0">
+          <Link to="/profile" className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-brand-surface border border-brand-border flex items-center justify-center hover:border-brand-primary transition-all">
+            <User className="text-brand-text-muted w-4 h-4 sm:w-5 sm:h-5" />
           </Link>
         </div>
       </div>
@@ -324,40 +407,50 @@ function Library({ search }: { search: string }) {
   );
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-14">
       {/* Resume Section */}
       {resume && (
         <motion.div 
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-            <Bookmark className="w-5 h-5 text-brand-primary" />
-            Kaldığın Yerden Devam Et
-          </h2>
-          <div className="group relative bg-gradient-to-r from-brand-surface to-[#27272a] border border-brand-border rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-6 overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-              <Book className="w-32 h-32 text-brand-primary" strokeWidth={1} />
-            </div>
+          <div className="group relative bg-[#0a0a0a] border border-brand-border rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-10 overflow-hidden shadow-2xl">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-primary/5 rounded-full blur-[80px] pointer-events-none" />
             
-            <div className="relative w-20 h-28 rounded-lg overflow-hidden shadow-2xl shrink-0 border border-brand-border">
+            <div className="relative w-28 h-40 rounded-xl overflow-hidden shadow-2xl shrink-0 border border-brand-border group-hover:scale-105 transition-transform duration-500">
               <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="w-full h-full object-cover" />
             </div>
             
-            <div className="flex-1 text-center sm:text-left relative z-10">
-              <h4 className="text-[10px] font-bold uppercase tracking-[2px] text-brand-text-muted mb-1">Okumaya Devam Et</h4>
-              <h3 className="text-2xl font-bold text-white mb-4 leading-tight">{resume.novelTitle}</h3>
-              <div className="hidden sm:block w-full max-w-xs h-1.5 bg-white/10 rounded-full mb-2 overflow-hidden">
-                <div className="h-full bg-brand-primary w-2/3 rounded-full" />
+            <div className="flex-1 text-center md:text-left relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-brand-primary text-[10px] font-bold uppercase tracking-widest mb-4">
+                <Bookmark className="w-3 h-3" />
+                Okumaya Devam Et
               </div>
-              <p className="text-xs text-brand-text-muted">Bölüm {resume.chapterId} / Güncel</p>
+              <h3 className="text-3xl font-display font-bold text-white mb-2 leading-tight">{resume.novelTitle}</h3>
+              <p className="text-sm text-brand-text-muted mb-6">Bölüm {resume.chapterId} / Güncel</p>
+              
+              <div className="hidden md:flex flex-col gap-2">
+                <div className="w-full max-w-sm h-1 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: '70%' }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    className="h-full bg-brand-primary shadow-[0_0_10px_rgba(56,189,248,0.5)]" 
+                  />
+                </div>
+                <div className="flex justify-between max-w-sm text-[10px] font-bold text-brand-text-muted/50 uppercase tracking-tighter">
+                  <span>Başlangıç</span>
+                  <span>Hedef: Tamamlama</span>
+                </div>
+              </div>
             </div>
             
             <Link 
               to={`/read/${resume.slug}/${resume.chapterId}`}
-              className="relative z-10 px-8 py-3 bg-brand-primary text-black font-bold rounded-lg hover:scale-105 active:scale-95 transition-transform shrink-0"
+              className="relative z-10 px-10 py-4 bg-brand-primary text-black font-black uppercase text-xs tracking-widest rounded-full hover:shadow-[0_0_30px_rgba(56,189,248,0.4)] active:scale-95 transition-all shrink-0"
             >
-              Okumaya Başla
+              Macera'ya Dön
             </Link>
           </div>
         </motion.div>
@@ -365,42 +458,54 @@ function Library({ search }: { search: string }) {
 
       {/* Popüler Noveller Grid */}
       <div>
-        <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-          <span>🔥</span> Popüler Noveller
+        <h2 className="text-xl font-display font-bold text-white mb-8 flex items-center gap-3">
+          <span className="w-1.5 h-6 bg-brand-primary rounded-full" />
+          Popüler Noveller
         </h2>
         
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-8">
             {[...Array(10)].map((_, i) => (
-              <div key={i} className="space-y-3">
-                <div className="aspect-[2/3] bg-brand-surface rounded-xl animate-pulse" />
-                <div className="h-4 bg-brand-surface rounded w-3/4 animate-pulse" />
+              <div key={i} className="space-y-4">
+                <div className="aspect-[2/3] bg-brand-card rounded-2xl animate-pulse" />
+                <div className="h-4 bg-brand-card rounded-full w-3/4 animate-pulse" />
               </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
-            {filteredNovels.map((novel) => (
-              <Link 
-                key={novel.slug} 
-                to={`/novel/${novel.slug}`}
-                className="group flex flex-col"
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-8">
+            {filteredNovels.map((novel, idx) => (
+              <motion.div
+                key={novel.slug}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3, delay: idx * 0.05 }}
               >
-                <div className="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 bg-brand-surface border border-brand-border group-hover:-translate-y-1 transition-all duration-300">
-                  <img 
-                    src={api.getCoverUrl(novel.slug)} 
-                    alt={novel.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  />
-                </div>
-                <h3 className="font-semibold text-sm line-clamp-2 text-brand-text-main group-hover:text-brand-primary transition-colors leading-snug mb-1">
-                  {novel.title}
-                </h3>
-                <div className="flex items-center justify-between text-[11px] text-brand-text-muted mt-auto uppercase tracking-tighter font-medium">
-                  <span>Bölüm {novel.chapterCount}</span>
-                  <span>{new Date(novel.lastUpdated).toLocaleDateString('tr-TR')}</span>
-                </div>
-              </Link>
+                <Link 
+                  to={`/novel/${novel.slug}`}
+                  className="group flex flex-col"
+                >
+                  <div className="relative aspect-[10/14] rounded-2xl overflow-hidden mb-4 bg-brand-card border border-brand-border group-hover:border-brand-primary/30 transition-all duration-500 shadow-lg group-hover:shadow-brand-primary/5">
+                    <img 
+                      src={api.getCoverUrl(novel.slug)} 
+                      alt={novel.title} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    />
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent group-hover:opacity-0 transition-opacity duration-500" />
+                    <div className="absolute bottom-3 left-3 flex gap-2">
+                       <span className="px-2 py-1 bg-black/50 backdrop-blur-md rounded-md text-[9px] font-bold text-brand-primary border border-brand-primary/20 uppercase tracking-tighter">
+                         {novel.chapterCount} Bölüm
+                       </span>
+                    </div>
+                  </div>
+                  <h3 className="font-bold text-sm line-clamp-1 text-zinc-100 group-hover:text-brand-primary transition-colors leading-tight mb-1">
+                    {novel.title}
+                  </h3>
+                  <p className="text-[10px] text-brand-text-muted font-medium uppercase tracking-tighter">
+                    {new Date(novel.lastUpdated).toLocaleDateString('tr-TR', { month: 'long', day: 'numeric' })}
+                  </p>
+                </Link>
+              </motion.div>
             ))}
           </div>
         )}
@@ -428,50 +533,71 @@ function HistoryPage({ session }: { session: Session | null }) {
   }, [session]);
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-          <History className="w-6 h-6 text-brand-primary" />
-          Okuma Geçmişi
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
+        <h1 className="text-2xl sm:text-4xl font-display font-bold text-white flex items-center gap-3 sm:gap-4">
+          <History className="w-6 h-6 sm:w-8 sm:h-8 text-brand-primary shrink-0" />
+          Geçmiş
         </h1>
         <button 
           onClick={() => {
             storage.clearHistory();
             setHistory([]);
           }}
-          className="text-xs font-bold uppercase tracking-wider text-red-500/80 hover:text-red-500 py-2 px-3 rounded-lg border border-red-500/20 hover:bg-red-500/5 transition-all"
+          className="w-fit text-[10px] font-black uppercase tracking-[2px] text-red-500 hover:text-white py-2.5 px-6 rounded-full border border-red-500/20 hover:bg-red-500 hover:border-red-500 transition-all font-sans"
         >
-          Tümünü Temizle
+          Tümünü Sıfırla
         </button>
       </div>
 
       {loading ? (
-        <div className="p-20 text-center animate-pulse text-brand-text-muted">Geçmiş yükleniyor...</div>
-      ) : history.length === 0 ? (
-        <div className="text-center py-20 bg-brand-surface rounded-2xl border border-brand-border">
-          <History className="w-12 h-12 text-brand-text-muted mx-auto mb-4 opacity-10" />
-          <p className="text-brand-text-muted">Okuma geçmişin şu an boş.</p>
-          <Link to="/" className="text-brand-primary mt-4 inline-block font-medium hover:underline">Hemen bir şeyler keşfet</Link>
+        <div className="grid gap-4">
+          {[...Array(5)].map((_, i) => (
+             <div key={i} className="h-24 bg-brand-card rounded-2xl animate-pulse border border-brand-border" />
+          ))}
         </div>
+      ) : history.length === 0 ? (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-32 bg-[#0a0a0a] rounded-[2.5rem] border border-brand-border"
+        >
+          <History className="w-16 h-16 text-brand-text-muted mx-auto mb-6 opacity-10" />
+          <p className="text-brand-text-muted font-medium mb-1">Henüz hiçbir şey okumadınız.</p>
+          <p className="text-xs text-brand-text-muted/60 mb-8 font-medium italic">Macera seni bekliyor...</p>
+          <Link to="/" className="px-8 py-3 bg-brand-primary text-black font-black uppercase text-xs tracking-widest rounded-full hover:shadow-[0_0_20px_rgba(56,189,248,0.3)] transition-all">Keşfetmeye Başla</Link>
+        </motion.div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid gap-4">
           {history.map((item, idx) => (
-            <Link 
+            <motion.div
               key={`${item.slug}-${item.chapterId}-${item.timestamp}`}
-              to={`/read/${item.slug}/${item.chapterId}`}
-              className="flex items-center gap-4 p-4 rounded-xl bg-brand-surface border border-brand-border hover:bg-brand-surface transition-all group"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.05 }}
+              className="min-w-0"
             >
-              <div className="w-12 h-16 rounded border border-brand-border overflow-hidden shrink-0">
-                <img src={api.getCoverUrl(item.slug)} alt={item.novelTitle} className="w-full h-full object-cover" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-sm text-white group-hover:text-brand-primary transition-colors">{item.novelTitle}</h3>
-                <p className="text-xs text-brand-text-muted mt-1">Bölüm {item.chapterId}</p>
-              </div>
-              <div className="text-right text-[10px] font-bold uppercase tracking-widest text-brand-text-muted">
-                {formatDistanceToNow(item.timestamp, { addSuffix: true, locale: tr })}
-              </div>
-            </Link>
+              <Link 
+                to={`/read/${item.slug}/${item.chapterId}`}
+                className="flex items-center gap-3 sm:gap-6 p-3 sm:p-5 rounded-2xl bg-[#0a0a0a] border border-brand-border hover:border-brand-primary/40 hover:bg-[#111111] transition-all group relative overflow-hidden min-w-0 w-full"
+              >
+                <div className="w-10 h-14 sm:w-14 sm:h-20 rounded-lg border border-brand-border overflow-hidden shrink-0 shadow-lg">
+                  <img src={api.getCoverUrl(item.slug)} alt={item.novelTitle} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                </div>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <h3 className="font-bold text-sm sm:text-base text-zinc-100 group-hover:text-brand-primary transition-colors truncate w-full block">
+                    {item.novelTitle}
+                  </h3>
+                  <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-1.5 min-w-0">
+                    <span className="text-[8px] sm:text-[10px] font-black text-brand-primary border border-brand-primary/20 px-1 sm:px-2 py-0.5 rounded uppercase tracking-widest shrink-0">B {item.chapterId}</span>
+                    <span className="text-[8px] sm:text-[10px] font-bold text-brand-text-muted uppercase tracking-tighter truncate opacity-60">
+                      {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: tr })}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-brand-text-muted group-hover:text-brand-primary transition-all group-hover:translate-x-1 shrink-0" />
+              </Link>
+            </motion.div>
           ))}
         </div>
       )}
@@ -484,6 +610,11 @@ function NovelDetails() {
   const [config, setConfig] = useState<NovelConfig | null>(null);
   const [novel, setNovel] = useState<Novel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [resume, setResume] = useState<ResumeData | null>(null);
+  const pageSize = 48;
 
   useEffect(() => {
     if (!slug) return;
@@ -493,6 +624,8 @@ function NovelDetails() {
     ]).then(([conf, nav]) => {
       setConfig(conf);
       setNovel(nav || null);
+      setHistory(storage.getHistory());
+      setResume(storage.getResume());
       setLoading(false);
     });
   }, [slug]);
@@ -500,50 +633,173 @@ function NovelDetails() {
   if (loading) return <div className="p-20 text-center animate-pulse text-brand-text-muted">İçerik hazırlanıyor...</div>;
   if (!config || !novel) return <div className="p-20 text-center text-red-500">Novel bulunamadı.</div>;
 
+  const currentResume = resume?.slug === slug ? resume : null;
+  const readChapters = new Set(history.filter(h => h.slug === slug).map(h => h.chapterId));
+
+  const filteredChapters = config.chapters.filter(ch => 
+    ch.id.toString().includes(search) || 
+    ch.id.toString() === search
+  );
+
+  const totalPages = Math.ceil(filteredChapters.length / pageSize);
+  const paginatedChapters = filteredChapters.slice((page - 1) * pageSize, page * pageSize);
+
   return (
-    <div className="flex flex-col md:flex-row gap-12">
+    <div className="flex flex-col md:flex-row gap-16">
       {/* Novel Header Info */}
       <div className="w-full md:w-80 shrink-0">
-        <div className="sticky top-24 space-y-6">
-          <div className="aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-brand-border ring-1 ring-white/5">
+        <div className="sticky top-24 space-y-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="aspect-[2/3] rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] border border-brand-border ring-1 ring-white/5"
+          >
             <img src={api.getCoverUrl(config.slug)} alt={novel.title} className="w-full h-full object-cover" />
-          </div>
+          </motion.div>
           <div>
-            <h1 className="text-2xl font-bold text-white mb-2 leading-tight">{novel.title}</h1>
-            <div className="flex items-center gap-3 text-brand-text-muted text-xs font-bold uppercase tracking-widest mb-6">
-              <Book className="w-4 h-4 text-brand-primary" />
-              {config.total_chapters} BÖLÜM
+            <h1 className="text-4xl font-display font-bold text-white mb-4 leading-[1.1] tracking-tight">{novel.title}</h1>
+            <div className="flex items-center gap-4 text-brand-text-muted text-[10px] font-bold uppercase tracking-[3px] mb-8">
+              <span className="flex items-center gap-2">
+                <Book className="w-4 h-4 text-brand-primary" />
+                {config.total_chapters} BÖLÜM
+              </span>
+              <span className="w-1 h-1 rounded-full bg-brand-border" />
+              <span>GÜNCEL</span>
             </div>
-            <Link 
-              to={`/read/${config.slug}/${config.chapters[0].id}`}
-              className="block w-full py-4 bg-brand-primary text-black font-bold rounded-xl text-center shadow-lg shadow-brand-primary/20 hover:scale-[1.02] active:scale-95 transition-all text-sm"
-            >
-              Okumaya Başla
-            </Link>
+            <div className="flex flex-col gap-3">
+              {currentResume ? (
+                <Link 
+                  to={`/read/${config.slug}/${currentResume.chapterId}`}
+                  className="flex items-center justify-center gap-3 w-full py-5 bg-brand-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl text-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  <Play className="w-4 h-4 fill-current" />
+                  Devam Et (B{currentResume.chapterId})
+                </Link>
+              ) : (
+                <Link 
+                  to={`/read/${config.slug}/${config.chapters[0].id}`}
+                  className="block w-full py-5 bg-brand-primary text-black font-black uppercase text-xs tracking-widest rounded-2xl text-center shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  İlk Bölümü Oku
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Chapters List */}
-      <div className="flex-1">
-        <h2 className="text-lg font-bold text-white mb-6 pb-2 border-b border-brand-border flex items-center gap-2">
-          <span>📜</span> Bölüm Arşivi
-        </h2>
-        <div className="grid gap-2">
-          {config.chapters.map((ch) => (
-            <Link 
-              key={ch.id}
-              to={`/read/${config.slug}/${ch.id}`}
-              className="flex items-center justify-between p-4 rounded-xl bg-brand-surface border border-brand-border hover:border-brand-primary/50 transition-all group"
-            >
-              <div className="flex items-center gap-4">
-                <span className="w-8 text-[10px] font-bold text-brand-text-muted">#{ch.id}</span>
-                <span className="font-semibold text-sm group-hover:text-brand-primary transition-colors">Bölüm {ch.id}</span>
-              </div>
-              <ChevronRight className="w-4 h-4 text-brand-text-muted group-hover:text-brand-primary transition-colors translate-x-0 group-hover:translate-x-1" />
-            </Link>
-          ))}
+      <div className="flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 pb-8 border-b border-brand-border">
+          <h2 className="text-xl font-display font-bold text-white flex items-center gap-3">
+            <span className="w-1.5 h-6 bg-brand-primary rounded-full" />
+            Bölüm Listesi
+          </h2>
+          
+          <div className="relative group w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-brand-text-muted group-focus-within:text-brand-primary transition-colors" />
+            <input 
+              type="text"
+              placeholder="Bölüm ara..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full bg-[#0a0a0a] border border-brand-border rounded-xl py-2.5 pl-10 pr-4 text-xs text-brand-text-main placeholder:text-zinc-600 focus:outline-none focus:border-brand-primary/50 transition-all font-sans"
+            />
+          </div>
         </div>
+
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+          {paginatedChapters.map((ch, idx) => {
+            const isRead = readChapters.has(ch.id);
+            const isLatest = currentResume?.chapterId === ch.id;
+            return (
+              <motion.div
+                key={ch.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: (idx % 24) * 0.01 }}
+              >
+                <Link 
+                  to={`/read/${config.slug}/${ch.id}`}
+                  className={cn(
+                    "relative aspect-square flex flex-col items-center justify-center rounded-xl border transition-all group overflow-hidden",
+                    isLatest 
+                      ? "bg-brand-primary text-black border-brand-primary shadow-[0_0_15px_rgba(56,189,248,0.3)] ring-2 ring-brand-primary/20" 
+                      : isRead
+                        ? "bg-brand-primary/5 border-brand-primary/20 text-brand-primary/60 shadow-inner"
+                        : "bg-[#0a0a0a] border-brand-border text-zinc-500 hover:border-brand-primary/40 hover:bg-[#111111] hover:text-brand-primary"
+                  )}
+                >
+                  {isRead && !isLatest && (
+                    <div className="absolute top-1 right-1">
+                      <Check className="w-2.5 h-2.5" />
+                    </div>
+                  )}
+                  <span className="text-[9px] font-black font-mono leading-none mb-1 opacity-40">#{ch.id.toString().padStart(2, '0')}</span>
+                  <span className="font-display font-black text-xs sm:text-sm tracking-tighter">B{ch.id}</span>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-12 pb-8">
+            <button 
+              onClick={() => {
+                setPage(p => Math.max(1, p - 1));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              disabled={page === 1}
+              className="p-2.5 rounded-xl bg-brand-surface border border-brand-border text-brand-text-muted disabled:opacity-30 hover:border-brand-primary transition-all"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-1">
+              {[...Array(totalPages)].map((_, i) => {
+                const p = i + 1;
+                if (p === 1 || p === totalPages || (p >= page - 2 && p <= page + 2)) {
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => {
+                        setPage(p);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className={cn(
+                        "w-10 h-10 rounded-xl text-[10px] font-black transition-all",
+                        page === p 
+                          ? "bg-brand-primary text-black" 
+                          : "bg-brand-surface text-brand-text-muted border border-brand-border hover:border-brand-primary/40"
+                      )}
+                    >
+                      {p}
+                    </button>
+                  );
+                }
+                if (p === page - 3 || p === page + 3) return <span key={p} className="text-zinc-700">...</span>;
+                return null;
+              })}
+            </div>
+            <button 
+              onClick={() => {
+                setPage(p => Math.min(totalPages, p + 1));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              disabled={page === totalPages}
+              className="p-2.5 rounded-xl bg-brand-surface border border-brand-border text-brand-text-muted disabled:opacity-30 hover:border-brand-primary transition-all"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+
+        {filteredChapters.length === 0 && (
+          <div className="py-20 text-center text-brand-text-muted italic opacity-50">Sonuç bulunamadı...</div>
+        )}
       </div>
     </div>
   );
@@ -560,6 +816,7 @@ function Reader({ session }: { session: Session | null }) {
   const [loading, setLoading] = useState(true);
   const [readerSettings, setReaderSettings] = useState<ReadingSettings>(storage.getReadingSettings());
   const [showSettings, setShowSettings] = useState(false);
+  const [showChapters, setShowChapters] = useState(false);
 
   useEffect(() => {
     if (!slug || !chapterId) return;
@@ -630,20 +887,34 @@ function Reader({ session }: { session: Session | null }) {
       {/* Reader Nav */}
       <nav className="glass-header h-16 flex items-center shrink-0">
         <div className="container mx-auto px-6 flex items-center justify-between">
-          <button 
-            onClick={() => navigate(`/novel/${slug}`)}
-            className="flex items-center gap-2 text-brand-text-muted hover:text-white transition-colors group"
+          <Link 
+            to={`/novel/${slug}`}
+            className="flex items-center gap-3 text-brand-text-muted hover:text-white transition-all group"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="hidden sm:inline text-xs font-bold uppercase tracking-wider">Geri Dön</span>
-          </button>
+            <div className="p-1.5 rounded-full bg-white/5 border border-white/10 group-hover:border-brand-primary/40 group-hover:bg-brand-primary/5">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            </div>
+            <span className="hidden sm:inline text-[10px] font-black uppercase tracking-[2px]">Geri Dön</span>
+          </Link>
           
           <div className="flex flex-col items-center max-w-[60%]">
-            <h2 className="text-sm font-bold text-white truncate w-full text-center tracking-tight">{novel.title}</h2>
-            <span className="text-[10px] text-brand-primary font-black uppercase tracking-[3px]">BÖLÜM {chapterId}</span>
+            <h2 className="text-sm font-display font-bold text-zinc-100 truncate w-full text-center tracking-tight leading-none mb-1">{novel.title}</h2>
+            <div className="flex items-center gap-2">
+              <span className="w-1 h-1 rounded-full bg-brand-primary shadow-[0_0_8px_rgba(56,189,248,0.8)] animate-pulse" />
+              <span className="text-[10px] text-brand-text-muted font-black uppercase tracking-[3px]">BÖLÜM {chapterId}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setShowChapters(!showChapters)}
+              className={cn(
+                "p-2 rounded-lg transition-all",
+                showChapters ? "bg-brand-primary text-black" : "text-brand-text-muted hover:text-white"
+              )}
+            >
+              <Menu className="w-4 h-4" />
+            </button>
             <button 
               onClick={() => setShowSettings(!showSettings)}
               className={cn(
@@ -657,6 +928,44 @@ function Reader({ session }: { session: Session | null }) {
         </div>
 
         <AnimatePresence>
+          {showChapters && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute top-16 left-0 right-0 z-40 bg-brand-surface border-b border-brand-border shadow-2xl backdrop-blur-xl"
+            >
+              <div className="container mx-auto p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-sm font-display font-bold text-white uppercase tracking-widest">Bölümler</h3>
+                  <button onClick={() => setShowChapters(false)} className="text-brand-text-muted hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-2 max-h-[60vh] overflow-y-auto hide-scrollbar p-1">
+                  {config.chapters.map((ch) => {
+                    const isCurrent = ch.id === parseInt(chapterId!);
+                    return (
+                      <Link
+                        key={ch.id}
+                        to={`/read/${slug}/${ch.id}`}
+                        onClick={() => setShowChapters(false)}
+                        className={cn(
+                          "aspect-square flex items-center justify-center rounded-lg border text-[10px] font-black transition-all",
+                          isCurrent
+                            ? "bg-brand-primary text-black border-brand-primary"
+                            : "bg-brand-bg text-brand-text-muted border-brand-border hover:border-brand-primary/40 hover:text-brand-primary"
+                        )}
+                      >
+                        {ch.id}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
           {showSettings && (
             <motion.div 
               initial={{ opacity: 0, y: -10 }}
@@ -798,29 +1107,31 @@ export default function App() {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col bg-brand-bg text-brand-text-main selection:bg-brand-primary/30 pb-20 lg:pb-0">
+      <div className="min-h-screen flex flex-col bg-brand-bg text-brand-text-main selection:bg-brand-primary/30 pb-28 lg:pb-0 overflow-x-hidden">
         <Header search={search} setSearch={setSearch} />
         
-        <div className="flex-1 flex container mx-auto">
+        <div className="flex-1 flex w-full max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 overflow-hidden">
           <SideNav session={session} />
           
-          <main className={cn("flex-1 p-6 md:p-10 overflow-hidden")}>
-            <AnimatePresence mode="wait">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Library search={search} />} />
-                <Route path="/novel/:slug" element={<NovelDetails />} />
-                <Route path="/read/:slug/:chapterId" element={<Reader session={session} />} />
-                <Route path="/login" element={session ? <Navigate to="/profile" /> : <AuthPage />} />
-                
-                {/* Protected Routes */}
-                <Route path="/history" element={session ? <HistoryPage session={session} /> : <Navigate to="/login" />} />
-                <Route path="/profile" element={session ? <ProfilePage session={session} appearance={appearance} setAppearance={setAppearance} /> : <Navigate to="/login" />} />
+          <main className={cn("flex-1 p-0 sm:p-5 md:p-10 overflow-hidden min-w-0")}>
+            <div className="p-3 sm:p-0 h-full overflow-y-auto overflow-x-hidden hide-scrollbar">
+              <AnimatePresence mode="wait">
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Library search={search} />} />
+                  <Route path="/novel/:slug" element={<NovelDetails />} />
+                  <Route path="/read/:slug/:chapterId" element={<Reader session={session} />} />
+                  <Route path="/login" element={session ? <Navigate to="/profile" /> : <AuthPage />} />
+                  
+                  {/* Protected Routes */}
+                  <Route path="/history" element={session ? <HistoryPage session={session} /> : <Navigate to="/login" />} />
+                  <Route path="/profile" element={session ? <ProfilePage session={session} appearance={appearance} setAppearance={setAppearance} /> : <Navigate to="/login" />} />
 
-                {/* Redirect any other path to home */}
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
-            </AnimatePresence>
+                  {/* Redirect any other path to home */}
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </AnimatePresence>
+            </div>
           </main>
         </div>
 
