@@ -7,6 +7,7 @@ import { AppearanceSettings } from './types';
 import { storage } from './services/storage';
 import { supabase } from './lib/supabase';
 import { cn } from './lib/utils';
+import InstallPrompt from './components/InstallPrompt';
 
 // Lazy loaded Pages
 const Library = lazy(() => import('./pages/Library'));
@@ -354,6 +355,8 @@ export default function App() {
         </div>
 
         <BottomNav session={session} />
+        
+        <InstallPrompt />
 
         <footer className={cn("py-12 border-t border-brand-border text-center hidden lg:block", !session && "block")}>
           <p className="text-[10px] font-bold tracking-widest text-brand-text-muted uppercase">
