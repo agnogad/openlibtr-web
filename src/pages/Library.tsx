@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Play } from 'lucide-react';
+import { Search, Play, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Novel, ResumeData } from '../types';
 import { api } from '../services/api';
@@ -10,6 +10,8 @@ export default function Library({ search, setSearch }: { search: string, setSear
   const [novels, setNovels] = useState<Novel[]>([]);
   const [loading, setLoading] = useState(true);
   const [resume, setResume] = useState<ResumeData | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   useEffect(() => {
     api.getLibrary().then(data => {
@@ -19,9 +21,16 @@ export default function Library({ search, setSearch }: { search: string, setSear
     setResume(storage.getResume());
   }, []);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search]);
+
   const filteredNovels = novels.filter(n => 
     n.title.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredNovels.length / pageSize);
+  const paginatedNovels = filteredNovels.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="flex flex-col gap-10">
@@ -98,41 +107,69 @@ export default function Library({ search, setSearch }: { search: string, setSear
             </button>
           </div>
         ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8 content-visibility-auto">
-          {filteredNovels.map((novel, idx) => (
-            <motion.div
-              key={novel.slug}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
-            >
-              <Link 
-                to={`/novel/${novel.slug}`}
-                className="group flex flex-col"
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8 content-visibility-auto">
+            {paginatedNovels.map((novel, idx) => (
+              <motion.div
+                key={novel.slug}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
               >
-                <div className="m3-card aspect-[10/14] mb-4 overflow-hidden group-hover:-translate-y-2 group-hover:rotate-1 transition-all duration-500 ease-out">
-                  <img 
-                    src={api.getCoverUrl(novel.slug)} 
-                    alt={novel.title} 
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out" 
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/20 to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
-                  <div className="absolute bottom-6 left-0 right-0 text-center opacity-0 group-hover:opacity-100 translate-y-6 group-hover:translate-y-0 transition-all duration-500 delay-75">
-                    <span className="px-6 py-2.5 bg-brand-primary text-brand-bg text-[12px] font-black rounded-full shadow-xl">OKUMAYA BAŞLA</span>
+                <Link 
+                  to={`/novel/${novel.slug}`}
+                  className="group flex flex-col"
+                >
+                  <div className="m3-card aspect-[10/14] mb-4 overflow-hidden group-hover:-translate-y-2 group-hover:rotate-1 transition-all duration-500 ease-out">
+                    <img 
+                      src={api.getCoverUrl(novel.slug)} 
+                      alt={novel.title} 
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out" 
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-bg via-brand-bg/20 to-transparent opacity-0 group-hover:opacity-60 transition-opacity duration-500" />
+                    <div className="absolute bottom-6 left-0 right-0 text-center opacity-0 group-hover:opacity-100 translate-y-6 group-hover:translate-y-0 transition-all duration-500 delay-75">
+                      <span className="px-6 py-2.5 bg-brand-primary text-brand-bg text-[12px] font-black rounded-full shadow-xl">OKUMAYA BAŞLA</span>
+                    </div>
                   </div>
-                </div>
-                <h3 className="font-lexend font-bold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
-                  {novel.title}
-                </h3>
-                <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide">
-                  {novel.chapterCount} Bölüm
-                </p>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                  <h3 className="font-lexend font-bold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
+                    {novel.title}
+                  </h3>
+                  <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide">
+                    {novel.chapterCount} Bölüm
+                  </p>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-6 mt-12 py-10 border-t border-brand-border/10">
+              <button 
+                disabled={page === 1}
+                onClick={() => {
+                  setPage(p => p - 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="p-3 rounded-2xl bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 transition-all"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <span className="text-sm font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">SAYFA {page} / {totalPages}</span>
+              <button 
+                disabled={page === totalPages}
+                onClick={() => {
+                  setPage(p => p + 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="p-3 rounded-2xl bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 transition-all"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </div>
+          )}
+        </>
         )}
       </div>
     </div>
