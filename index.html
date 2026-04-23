@@ -45,7 +45,9 @@
             const link = document.createElement('link');
             link.rel = 'preload';
             link.as = 'image';
-            link.href = `https://raw.githubusercontent.com/agnogad/openlibtr/main/books/${resume.slug}/cover.jpg`;
+            const baseUrl = 'https://raw.githubusercontent.com/agnogad/openlibtr/main';
+            const imgUrl = `${baseUrl}/books/${resume.slug}/cover.jpg`;
+            link.href = `https://wsrv.nl/?url=${encodeURIComponent(imgUrl)}&w=400&output=webp&q=80`;
             link.fetchPriority = 'high';
             document.head.appendChild(link);
           }

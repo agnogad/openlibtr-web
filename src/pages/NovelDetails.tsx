@@ -68,7 +68,7 @@ export default function NovelDetails() {
             animate={{ opacity: 1, scale: 1 }}
             className="aspect-[2/3] rounded-[28px] overflow-hidden shadow-2xl border border-brand-border/20"
           >
-            <img src={api.getCoverUrl(config.slug)} alt={novel.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+            <img src={api.getCoverUrl(config.slug)} alt={novel.title} className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
           </motion.div>
           
           <div className="space-y-6">

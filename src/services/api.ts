@@ -49,6 +49,7 @@ export const api = {
   },
 
   getCoverUrl: (slug: string): string => {
-    return `${BASE_URL}/books/${slug}/cover.jpg`;
+    const originalUrl = `${BASE_URL}/books/${slug}/cover.jpg`;
+    return `https://wsrv.nl/?url=${encodeURIComponent(originalUrl)}&w=400&output=webp&q=80`;
   }
 };
