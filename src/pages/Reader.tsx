@@ -56,7 +56,7 @@ export default function Reader({ session }: { session: Session | null }) {
     
     Promise.all([
       api.getNovelConfig(slug),
-      api.getLibrary().then(lib => lib.find(n => n.slug === slug))
+      api.getNovel(slug)
     ]).then(([conf, nav]) => {
       setConfig(conf);
       setNovel(nav || null);

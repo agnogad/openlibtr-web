@@ -336,7 +336,7 @@ export default function App() {
                   <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Library search={search} setSearch={setSearch} />} />
-                    <Route path="/novel/:slug" element={<NovelDetails />} />
+                    <Route path="/novel/:slug" element={<NovelDetails session={session} />} />
                     <Route path="/read/:slug/:chapterId" element={<Reader session={session} />} />
                     <Route path="/login" element={session ? <Navigate to="/profile" /> : <AuthPage />} />
                     

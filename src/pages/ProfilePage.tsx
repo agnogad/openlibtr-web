@@ -1,10 +1,13 @@
-import React from 'react';
-import { User, LogOut, Settings, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { User, LogOut, Settings, Check, Book, Trash2, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { AppearanceSettings } from '../types';
 import { supabase } from '../lib/supabase';
 import { storage } from '../services/storage';
+import { offlineDB, DownloadedNovel } from '../services/db';
+import { api } from '../services/api';
 import { cn } from '../lib/utils';
 
 export default function ProfilePage({ 
@@ -16,6 +19,23 @@ export default function ProfilePage({
   appearance: AppearanceSettings, 
   setAppearance: (a: AppearanceSettings) => void 
 }) {
+  const [downloadedNovels, setDownloadedNovels] = useState<DownloadedNovel[]>([]);
+  const [loadingDownloads, setLoadingDownloads] = useState(true);
+
+  useEffect(() => {
+    offlineDB.getAllNovels().then(data => {
+      setDownloadedNovels(data);
+      setLoadingDownloads(false);
+    });
+  }, []);
+
+  const handleDelete = async (slug: string) => {
+    if (confirm("Bu noveli indirlenlerden silmek istediğinize emin misiniz?")) {
+      await offlineDB.deleteNovel(slug);
+      setDownloadedNovels(prev => prev.filter(n => n.slug !== slug));
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
@@ -139,6 +159,75 @@ export default function ProfilePage({
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Downloads Section */}
+      <div className="mt-12 space-y-8">
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary">
+              <Download className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-lexend font-bold text-white">İndirilenler</h3>
+          </div>
+          <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">
+            {downloadedNovels.length} NOVEL
+          </span>
+        </div>
+
+        {loadingDownloads ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[...Array(2)].map((_, i) => (
+              <div key={i} className="m3-card p-4 h-32 animate-pulse" />
+            ))}
+          </div>
+        ) : downloadedNovels.length === 0 ? (
+          <div className="m3-card p-12 text-center border-dashed">
+            <div className="w-16 h-16 bg-brand-surface-variant/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Download className="w-8 h-8 text-brand-text-muted opacity-30" />
+            </div>
+            <p className="text-brand-text-muted font-lexend text-sm">Henüz çevrimdışı okumak için bir novel indirmediniz.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {downloadedNovels.map((download) => (
+              <motion.div
+                key={download.slug}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="m3-card p-4 group"
+              >
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={api.getCoverUrl(download.slug)} 
+                    alt={download.novel.title} 
+                    className="w-16 h-24 object-cover rounded-xl shadow-md border border-brand-border/20"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-lexend font-bold text-white text-sm line-clamp-1 mb-1">{download.novel.title}</h4>
+                    <p className="text-[10px] text-brand-text-muted uppercase tracking-wider mb-4">
+                      {download.config.total_chapters} Bölüm &bull; İndirildi
+                    </p>
+                    <div className="flex items-center gap-2">
+                       <Link 
+                        to={`/novel/${download.slug}`}
+                        className="flex-1 py-1.5 bg-brand-primary text-brand-bg text-[11px] font-bold rounded-lg text-center hover:brightness-110 transition-all"
+                       >
+                         OKU
+                       </Link>
+                       <button
+                        onClick={() => handleDelete(download.slug)}
+                        className="p-1.5 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-all"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
