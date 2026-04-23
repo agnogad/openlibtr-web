@@ -33,7 +33,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
         >
           <div className="m3-card p-6 flex flex-col md:flex-row items-center gap-8 bg-brand-primary-container/10">
             <div className="relative w-28 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0 border border-brand-border/20">
-              <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+              <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
             </div>
             
             <div className="flex-1 text-center md:text-left">

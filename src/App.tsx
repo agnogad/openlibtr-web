@@ -305,18 +305,11 @@ export default function App() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (authLoading) setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, []);
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
-        <div className="w-10 h-10 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  }, [authLoading]);
 
   return (
     <Router>

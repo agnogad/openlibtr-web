@@ -9,6 +9,49 @@
     <link rel="apple-touch-icon" href="/icon.svg" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Performance Optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://raw.githubusercontent.com/agnogad/openlibtr/main/library.json" as="fetch" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Lexend:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    
+    <script>
+      // Smart LCP Discovery & Theme Pre-calculation
+      (function() {
+        // 1. Theme Pre-calculation
+        const storageKey = 'okuttur-appearance';
+        let appearance = null;
+        try { appearance = JSON.parse(localStorage.getItem(storageKey)); } catch(e) {}
+        if (appearance) {
+          const root = document.documentElement;
+          root.style.setProperty('--primary-color', appearance.primaryColor);
+          const configs = {
+            material: { bg: '#1c1b1f', surface: '#25232a', border: '#49454f' },
+            pitch: { bg: '#000000', surface: '#0a0a0a', border: '#333333' },
+            deep: { bg: '#050a14', surface: '#0a1221', border: '#1e293b' },
+            forest: { bg: '#08100c', surface: '#0d1a14', border: '#2a3a30' }
+          };
+          const config = configs[appearance.theme] || configs.material;
+          root.style.setProperty('--bg-color', config.bg);
+          root.style.setProperty('--surface-color', config.surface);
+          root.style.setProperty('--border-color', config.border);
+        }
+
+        // 2. Smart LCP Preload
+        try {
+          const resume = JSON.parse(localStorage.getItem('okuttur-resume'));
+          if (resume && resume.slug) {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = `https://raw.githubusercontent.com/agnogad/openlibtr/main/books/${resume.slug}/cover.jpg`;
+            link.fetchPriority = 'high';
+            document.head.appendChild(link);
+          }
+        } catch(e) {}
+      })();
+    </script>
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
