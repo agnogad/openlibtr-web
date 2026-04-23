@@ -110,8 +110,12 @@ export default function Reader({ session }: { session: Session | null }) {
   const prevCh = config.chapters[currentIdx - 1];
   const nextCh = config.chapters[currentIdx + 1];
 
-  const htmlContent = DOMPurify.sanitize(marked.parse(chapter) as string);
-  const { time, words } = calculateReadingTime(chapter);
+  // Markdown.js satır başındaki 4 ve daha fazla boşluğu <pre><code> kodu olarak algılayıp 
+  // tasarıma zarar verebiliyor ve sağa kaymaya sebep oluyor. 
+  // Bu yüzden parse etmeden önce satır başı boşluklarını temizliyoruz.
+  const sanitizedChapterText = chapter.replace(/^[ \t]+/gm, '');
+  const htmlContent = DOMPurify.sanitize(marked.parse(sanitizedChapterText) as string);
+  const { time, words } = calculateReadingTime(sanitizedChapterText);
 
   const filteredQuickChapters = config.chapters.filter(ch => 
     ch.id.toString().includes(chapterSearch) || 
