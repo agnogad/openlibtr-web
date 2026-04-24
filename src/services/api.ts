@@ -19,9 +19,17 @@ const fetchWithCache = async <T>(key: string, fetchFn: () => Promise<T>): Promis
     return cached.data;
   }
 
-  const data = await fetchFn();
-  cache[key] = { timestamp: now, data };
-  return data;
+  try {
+    const data = await fetchFn();
+    cache[key] = { timestamp: now, data };
+    return data;
+  } catch (error) {
+    if (cached) {
+      console.warn(`[Offline fallback] Using stale cache for ${key}`);
+      return cached.data;
+    }
+    throw error;
+  }
 };
 
 export const api = {

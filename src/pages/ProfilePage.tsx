@@ -30,10 +30,8 @@ export default function ProfilePage({
   }, []);
 
   const handleDelete = async (slug: string) => {
-    if (confirm("Bu noveli indirlenlerden silmek istediğinize emin misiniz?")) {
-      await offlineDB.deleteNovel(slug);
-      setDownloadedNovels(prev => prev.filter(n => n.slug !== slug));
-    }
+    await offlineDB.deleteNovel(slug);
+    setDownloadedNovels(prev => prev.filter(n => n.slug !== slug));
   };
 
   const handleLogout = async () => {

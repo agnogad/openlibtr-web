@@ -89,10 +89,8 @@ export default function NovelDetails({ session }: { session: Session | null }) {
 
   const handleDeleteDownload = async () => {
     if (!slug) return;
-    if (confirm("Bu noveli indirlenlerden silmek istediğinize emin misiniz?")) {
-      await offlineDB.deleteNovel(slug);
-      setIsDownloaded(false);
-    }
+    await offlineDB.deleteNovel(slug);
+    setIsDownloaded(false);
   };
 
   if (loading) return (

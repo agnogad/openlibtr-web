@@ -17,13 +17,14 @@ export default defineConfig(({mode}) => {
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/raw\.githubusercontent\.com\/.*/i,
-              handler: 'StaleWhileRevalidate',
+              handler: 'NetworkFirst',
               options: {
                 cacheName: 'api-cache',
                 expiration: {
                   maxEntries: 100,
-                  maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
+                  maxAgeSeconds: 5 * 60 // 5 minutes
                 },
+                networkTimeoutSeconds: 5,
                 cacheableResponse: {
                   statuses: [0, 200]
                 }
