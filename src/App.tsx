@@ -360,7 +360,7 @@ export default function App() {
 
         <footer className={cn("py-12 border-t border-brand-border text-center hidden lg:block", !session && "block")}>
           <p className="text-[10px] font-bold tracking-widest text-brand-text-muted uppercase">
-            &copy; 2026 OKUTTUR &bull; Developed by AI
+            &copy; 2026 OKUTTUR &bull; Database from <a href="https://github.com/agnogad/openlibtr" target="_blank" rel="noopener noreferrer" className="hover:text-brand-primary transition-colors">openlibtr</a>
           </p>
         </footer>
       </div>
