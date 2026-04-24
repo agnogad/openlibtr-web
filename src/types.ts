@@ -35,6 +35,12 @@ export interface ReadingSettings {
   fontFamily: 'Lexend' | 'Inter' | 'Serif' | 'Mono';
 }
 
+export interface Bookmark {
+  slug: string;
+  title: string;
+  addedAt: number;
+}
+
 export interface AppearanceSettings {
   primaryColor: string;
   theme: 'material' | 'pitch' | 'deep' | 'forest';

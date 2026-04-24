@@ -4,6 +4,7 @@ const HISTORY_KEY = 'openlib_history';
 const RESUME_KEY = 'openlib_resume';
 const READING_SETTINGS_KEY = 'openlib_reading_settings';
 const APPEARANCE_SETTINGS_KEY = 'openlib_appearance_settings';
+const BOOKMARKS_KEY = 'openlib_bookmarks';
 
 export const storage = {
   // ... existing methods ...
@@ -49,5 +50,26 @@ export const storage = {
   getAppearanceSettings: (): AppearanceSettings => {
     const data = localStorage.getItem(APPEARANCE_SETTINGS_KEY);
     return data ? JSON.parse(data) : { primaryColor: '#ffffff', theme: 'pitch' };
+  },
+
+  getBookmarks: (): any[] => {
+    const data = localStorage.getItem(BOOKMARKS_KEY);
+    return data ? JSON.parse(data) : [];
+  },
+
+  addBookmark: (bookmark: any) => {
+    const bookmarks = storage.getBookmarks();
+    if (!bookmarks.find((b: any) => b.slug === bookmark.slug)) {
+      localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([bookmark, ...bookmarks]));
+    }
+  },
+
+  removeBookmark: (slug: string) => {
+    const bookmarks = storage.getBookmarks();
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks.filter((b: any) => b.slug !== slug)));
+  },
+  
+  isBookmarked: (slug: string): boolean => {
+    return storage.getBookmarks().some((b: any) => b.slug === slug);
   }
 };

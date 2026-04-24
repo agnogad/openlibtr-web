@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Play, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Play, ChevronLeft, ChevronRight, Book } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Novel, ResumeData } from '../types';
 import { api } from '../services/api';
@@ -11,6 +11,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
   const [loading, setLoading] = useState(true);
   const [resume, setResume] = useState<ResumeData | null>(null);
   const [page, setPage] = useState(1);
+  const [bookmarks, setBookmarks] = useState<any[]>([]);
   const pageSize = 20;
 
   useEffect(() => {
@@ -19,6 +20,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
       setLoading(false);
     });
     setResume(storage.getResume());
+    setBookmarks(storage.getBookmarks());
   }, []);
 
   useEffect(() => {
@@ -34,8 +36,8 @@ export default function Library({ search, setSearch }: { search: string, setSear
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Resume Section */}
-      {resume && (
+      {/* Hero / Resume Section */}
+      {resume ? (
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -60,6 +62,80 @@ export default function Library({ search, setSearch }: { search: string, setSear
             </div>
           </div>
         </motion.div>
+      ) : (
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative m3-card p-8 sm:p-12 overflow-hidden bg-brand-surface border border-brand-primary/20 flex flex-col md:flex-row items-center gap-8 justify-between"
+        >
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 flex-1 text-center md:text-left">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-lexend font-extrabold text-white mb-4 tracking-tight leading-tight">
+              Sonsuz dünyalara <br className="hidden md:block" />adım atın.
+            </h1>
+            <p className="text-base text-brand-text-muted max-w-lg mb-8 font-lexend">
+              Binlerce farklı light novel, web novel ve daha fazlası. Tamamen ücretsiz, açık kaynaklı ve reklamsız okuma deneyimi.
+            </p>
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+               <button 
+                onClick={() => {
+                  const input = document.getElementById('search-input');
+                  input?.focus();
+                  input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="px-8 py-4 bg-brand-primary text-brand-bg font-lexend font-bold rounded-full shadow-lg hover:brightness-110 active:scale-95 transition-all"
+              >
+                Keşfetmeye Başla
+              </button>
+            </div>
+          </div>
+          
+          <div className="relative z-10 hidden md:block shrink-0">
+             <div className="w-48 h-48 bg-brand-primary/10 rounded-full flex items-center justify-center border-4 border-brand-primary/30 shadow-2xl relative">
+                <Book className="w-20 h-20 text-brand-primary absolute transform -rotate-12" />
+             </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Favoriler Horizontal List */}
+      {bookmarks.length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-lexend font-bold text-white">Favorileriniz</h2>
+            <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{bookmarks.length} NOVEL</span>
+          </div>
+          <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar snap-x">
+            {bookmarks.map((bookmark, idx) => (
+              <motion.div
+                key={bookmark.slug}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                className="snap-start shrink-0 w-32 sm:w-40"
+              >
+                <Link 
+                  to={`/novel/${bookmark.slug}`}
+                  className="group flex flex-col"
+                >
+                  <div className="m3-card aspect-[10/14] mb-3 overflow-hidden group-hover:-translate-y-2 transition-all duration-300">
+                    <img 
+                      src={api.getCoverUrl(bookmark.slug)} 
+                      alt={bookmark.title} 
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-out" 
+                      loading="lazy"
+                    />
+                  </div>
+                  <h3 className="font-lexend font-bold text-sm line-clamp-2 text-white group-hover:text-brand-primary transition-colors leading-tight px-1">
+                    {bookmark.title}
+                  </h3>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Popüler Noveller Grid */}
@@ -74,6 +150,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
           <div className="relative group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-text-muted w-5 h-5 group-focus-within:text-brand-primary transition-colors" />
             <input 
+              id="search-input"
               type="text"
               placeholder="Novel kütüphanesinde keşfe çıkın..."
               value={search}

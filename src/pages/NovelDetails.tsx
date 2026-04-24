@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Search, Play, Book, Check, Clock, ChevronLeft, ChevronRight, Download, Trash2, Loader2 } from 'lucide-react';
+import { Search, Play, Book, Check, Clock, ChevronLeft, ChevronRight, Download, Trash2, Loader2, Heart, HeartOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { Novel, NovelConfig, HistoryItem, ResumeData } from '../types';
@@ -20,10 +20,12 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
+  const [bookmarked, setBookmarked] = useState(false);
   const pageSize = 48;
 
   useEffect(() => {
     if (!slug) return;
+    setBookmarked(storage.isBookmarked(slug));
     Promise.all([
       api.getNovelConfig(slug),
       api.getNovel(slug),
@@ -93,6 +95,17 @@ export default function NovelDetails({ session }: { session: Session | null }) {
     setIsDownloaded(false);
   };
 
+  const toggleBookmark = () => {
+    if (!slug || !novel) return;
+    if (bookmarked) {
+      storage.removeBookmark(slug);
+      setBookmarked(false);
+    } else {
+      storage.addBookmark({ slug, title: novel.title, addedAt: Date.now() });
+      setBookmarked(true);
+    }
+  };
+
   if (loading) return (
     <div className="flex flex-col md:flex-row gap-12 p-6 animate-pulse">
       <div className="w-full md:w-80 h-[480px] bg-brand-surface rounded-[28px]" />
@@ -140,6 +153,18 @@ export default function NovelDetails({ session }: { session: Session | null }) {
               <div className="px-4 py-1.5 rounded-full bg-brand-surface-variant/20 text-brand-text-muted text-xs font-lexend font-bold uppercase tracking-widest border border-brand-border/20">
                 GÜNCEL
               </div>
+              <button 
+                onClick={toggleBookmark}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-xs font-lexend font-bold uppercase tracking-widest border flex items-center gap-2 transition-all",
+                  bookmarked 
+                    ? "bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30" 
+                    : "bg-surface-variant/20 text-brand-text-muted border-brand-border/20 hover:bg-surface-variant/40"
+                )}
+              >
+                <Heart className={cn("w-3.5 h-3.5", bookmarked && "fill-current")} />
+                {bookmarked ? "Favorilerde" : "Favoriye Ekle"}
+              </button>
             </div>
 
             <div className="flex flex-col gap-4">
