@@ -195,34 +195,46 @@ export default function ProfilePage({
                 key={download.slug}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="m3-card p-4 group"
+                className="m3-card p-5 group flex flex-col gap-4 border-2 border-transparent hover:border-brand-primary/20"
               >
-                <div className="flex items-center gap-4">
-                  <img 
-                    src={api.getCoverUrl(download.slug)} 
-                    alt={download.novel.title} 
-                    className="w-16 h-24 object-cover rounded-xl shadow-md border border-brand-border/20"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-lexend font-bold text-white text-sm line-clamp-1 mb-1">{download.novel.title}</h4>
-                    <p className="text-[10px] text-brand-text-muted uppercase tracking-wider mb-4">
-                      {download.config.total_chapters} Bölüm &bull; İndirildi
-                    </p>
-                    <div className="flex items-center gap-2">
-                       <Link 
-                        to={`/novel/${download.slug}`}
-                        className="flex-1 py-1.5 bg-brand-primary text-brand-bg text-[11px] font-bold rounded-lg text-center hover:brightness-110 transition-all"
-                       >
-                         OKU
-                       </Link>
-                       <button
-                        onClick={() => handleDelete(download.slug)}
-                        className="p-1.5 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-all"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </button>
+                <div className="flex gap-4">
+                  <div className="relative shrink-0">
+                    <img 
+                      src={api.getCoverUrl(download.slug)} 
+                      alt={download.novel.title} 
+                      className="w-20 h-28 object-cover rounded-xl shadow-md border border-brand-border/30"
+                    />
+                    <div className="absolute -top-3 -right-3 bg-brand-primary text-brand-bg rounded-full p-1.5 shadow-lg border-2 border-brand-surface">
+                      <Check className="w-3.5 h-3.5" />
                     </div>
                   </div>
+                  
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <div className="inline-flex items-center gap-1.5 text-[9px] font-lexend font-bold text-green-400 uppercase tracking-widest bg-green-400/10 px-2 py-1 rounded-md w-fit mb-2 border border-green-400/20">
+                       <Download className="w-3 h-3" />
+                       Çevrimdışı Okunabilir
+                    </div>
+                    <h4 className="font-lexend font-bold text-white text-base line-clamp-2 mb-1 leading-snug">{download.novel.title}</h4>
+                    <p className="text-[11px] text-brand-text-muted mt-auto flex items-center gap-2">
+                       <Book className="w-3.5 h-3.5" /> {download.config.total_chapters} Bölüm
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2 mt-auto">
+                   <Link 
+                    to={`/novel/${download.slug}`}
+                    className="flex-1 py-3 bg-brand-surface-variant/30 text-white text-xs font-lexend font-bold rounded-xl text-center hover:bg-brand-primary hover:text-brand-bg transition-colors border border-transparent hover:border-brand-primary"
+                   >
+                     KİTABA GİT
+                   </Link>
+                   <button
+                    onClick={() => handleDelete(download.slug)}
+                    className="p-3 rounded-xl border border-brand-border/30 text-brand-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 transition-all"
+                    title="İndirmeyi Klasörden Sil"
+                   >
+                     <Trash2 className="w-4 h-4" />
+                   </button>
                 </div>
               </motion.div>
             ))}

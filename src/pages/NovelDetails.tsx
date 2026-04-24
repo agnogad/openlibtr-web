@@ -19,7 +19,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   const [resume, setResume] = useState<ResumeData | null>(null);
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
   const pageSize = 48;
 
   useEffect(() => {
@@ -44,17 +44,30 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   const handleDownload = async () => {
     if (!config || !novel || !slug) return;
     setDownloading(true);
-    setDownloadProgress(0);
-
+    
     try {
       const chapters: { [path: string]: string } = {};
       const total = config.chapters.length;
+      setDownloadProgress({ current: 0, total });
+      
+      const CONCURRENCY = 5; // Batch 5 chapters at once for fast but safe fetching
 
-      for (let i = 0; i < total; i++) {
-        const ch = config.chapters[i];
-        const content = await api.getChapterContent(slug, ch.path);
-        chapters[ch.path] = content;
-        setDownloadProgress(Math.round(((i + 1) / total) * 100));
+      for (let i = 0; i < total; i += CONCURRENCY) {
+        const chunk = config.chapters.slice(i, i + CONCURRENCY);
+        
+        await Promise.all(chunk.map(async (ch) => {
+          let content = '';
+          try {
+            content = await api.getChapterContent(slug, ch.path);
+          } catch (error) {
+            // Retry once on failure
+            console.warn(`Retrying chapter ${ch.id}...`);
+            content = await api.getChapterContent(slug, ch.path);
+          }
+          chapters[ch.path] = content;
+        }));
+
+        setDownloadProgress({ current: Math.min(i + CONCURRENCY, total), total });
       }
 
       await offlineDB.saveNovel({
@@ -68,7 +81,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
       setIsDownloaded(true);
     } catch (error) {
       console.error("Indirme hatası:", error);
-      alert("Indirme sırasında bir hata oluştu. Lütfen tekrar deneyin.");
+      alert("Indirme sırasında bir hata oluştu. Ağ bağlantınızı kontrol edip tekrar deneyin.");
     } finally {
       setDownloading(false);
     }
@@ -157,38 +170,64 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                       onClick={handleDownload}
                       disabled={downloading}
                       className={cn(
-                        "flex items-center justify-center gap-3 w-full py-4 border border-brand-primary text-brand-primary font-lexend font-bold text-xs tracking-widest rounded-full transition-all relative overflow-hidden",
-                        downloading ? "cursor-wait opacity-80" : "hover:bg-brand-primary/10 active:scale-[0.98]"
+                        "relative flex items-center justify-center gap-3 w-full py-5 rounded-2xl overflow-hidden transition-all group",
+                        downloading 
+                          ? "bg-brand-surface-variant/40 border border-brand-primary/20 cursor-wait" 
+                          : "bg-brand-surface-variant/20 border border-brand-border/30 hover:border-brand-primary/50 hover:bg-brand-primary/10 active:scale-[0.98]"
                       )}
                     >
                       {downloading ? (
                         <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          İNİDİRİLİYOR %{downloadProgress}
+                          {/* Animated Progress Background */}
                           <div 
-                            className="absolute bottom-0 left-0 h-1 bg-brand-primary transition-all duration-300" 
-                            style={{ width: `${downloadProgress}%` }}
+                            className="absolute inset-y-0 left-0 bg-brand-primary/20 transition-all duration-300 ease-out" 
+                            style={{ width: `${(downloadProgress.current / downloadProgress.total) * 100}%` }}
                           />
+                          <div className="relative flex items-center justify-center gap-3 w-full z-10">
+                            <Loader2 className="w-5 h-5 animate-spin text-brand-primary" />
+                            <div className="flex flex-col items-start text-left">
+                              <span className="text-[11px] font-lexend font-bold text-white tracking-widest uppercase">
+                                İndiriliyor
+                              </span>
+                              <span className="text-[9px] text-brand-text-muted uppercase tracking-widest">
+                                {downloadProgress.current} / {downloadProgress.total} BÖLÜM
+                              </span>
+                            </div>
+                          </div>
                         </>
                       ) : (
                         <>
-                          <Download className="w-4 h-4" />
-                          ÇEVRİMDIŞI OKUMAK İÇİN İNDİR
+                          <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform duration-300">
+                             <Download className="w-5 h-5" />
+                          </div>
+                          <div className="flex flex-col items-start text-left">
+                            <span className="text-xs font-lexend font-bold text-white tracking-wide">
+                              Çevrimdışı Oku
+                            </span>
+                            <span className="text-[10px] text-brand-text-muted uppercase tracking-wider">
+                              Cihazına İndir
+                            </span>
+                          </div>
                         </>
                       )}
                     </button>
                   ) : (
                     <div className="flex gap-2">
-                      <div className="flex-1 flex items-center justify-center gap-2 py-4 bg-green-500/10 text-green-500 border border-green-500/30 rounded-full text-[10px] font-lexend font-bold tracking-widest uppercase">
-                        <Check className="w-4 h-4" />
-                        İndirildi
+                      <div className="flex-1 flex flex-col justify-center px-5 py-3.5 bg-green-500/10 border border-green-500/20 rounded-2xl">
+                        <div className="flex items-center gap-2 mb-0.5">
+                           <Check className="w-4 h-4 text-green-400" />
+                           <span className="text-[11px] font-lexend font-bold text-green-400 tracking-widest uppercase">İndirildi</span>
+                        </div>
+                        <span className="text-[9px] text-brand-text-muted uppercase tracking-wider pl-6">
+                           Çevrimdışı Okunabilir
+                        </span>
                       </div>
                       <button
                         onClick={handleDeleteDownload}
-                        className="p-4 rounded-full border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-all"
+                        className="flex items-center justify-center w-14 rounded-2xl border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
                         title="İndirmeyi Sil"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   )}
