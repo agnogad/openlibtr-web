@@ -18,6 +18,8 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [resume, setResume] = useState<ResumeData | null>(null);
   const [isDownloaded, setIsDownloaded] = useState(false);
+  const [hasNewChapters, setHasNewChapters] = useState(false);
+  const [missingChapters, setMissingChapters] = useState<string[]>([]);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
   const [bookmarked, setBookmarked] = useState(false);
@@ -29,11 +31,23 @@ export default function NovelDetails({ session }: { session: Session | null }) {
     Promise.all([
       api.getNovelConfig(slug),
       api.getNovel(slug),
-      offlineDB.isDownloaded(slug)
-    ]).then(([conf, nav, downloaded]) => {
+      offlineDB.getNovel(slug)
+    ]).then(([conf, nav, storedNovel]) => {
       setConfig(conf);
       setNovel(nav || null);
-      setIsDownloaded(downloaded);
+      setIsDownloaded(!!storedNovel);
+      
+      if (storedNovel && conf) {
+        const storedPaths = Object.keys(storedNovel.chapters);
+        const latestPaths = conf.chapters.map(c => c.path);
+        const missing = latestPaths.filter(p => !storedPaths.includes(p));
+        setHasNewChapters(missing.length > 0);
+        setMissingChapters(missing);
+      } else {
+        setHasNewChapters(false);
+        setMissingChapters([]);
+      }
+
       if (nav) {
         document.title = `${nav.title} | OKUTTUR`;
       }
@@ -93,6 +107,55 @@ export default function NovelDetails({ session }: { session: Session | null }) {
     if (!slug) return;
     await offlineDB.deleteNovel(slug);
     setIsDownloaded(false);
+    setHasNewChapters(false);
+    setMissingChapters([]);
+  };
+
+  const handleUpdateDownload = async () => {
+    if (!config || !novel || !slug || missingChapters.length === 0) return;
+    setDownloading(true);
+    
+    try {
+      const storedNovel = await offlineDB.getNovel(slug);
+      if (!storedNovel) throw new Error("Local copy not found");
+
+      const newChapters: { [path: string]: string } = { ...storedNovel.chapters };
+      const total = missingChapters.length;
+      setDownloadProgress({ current: 0, total });
+      
+      const CONCURRENCY = 5;
+
+      for (let i = 0; i < total; i += CONCURRENCY) {
+        const chunk = missingChapters.slice(i, i + CONCURRENCY);
+        
+        await Promise.all(chunk.map(async (path) => {
+          let content = '';
+          try {
+            content = await api.getChapterContent(slug, path);
+          } catch (error) {
+            content = await api.getChapterContent(slug, path);
+          }
+          newChapters[path] = content;
+        }));
+
+        setDownloadProgress({ current: Math.min(i + CONCURRENCY, total), total });
+      }
+
+      await offlineDB.saveNovel({
+        ...storedNovel,
+        config, // Update config to latest
+        chapters: newChapters,
+        downloadedAt: Date.now()
+      });
+
+      setHasNewChapters(false);
+      setMissingChapters([]);
+    } catch (error) {
+      console.error("Güncelleme hatası:", error);
+      alert("Güncelleme sırasında bir hata oluştu.");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const toggleBookmark = () => {
@@ -234,23 +297,53 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                     )}
                   </button>
                 ) : (
-                  <div className="flex gap-2">
-                    <div className="flex-1 flex flex-col justify-center px-5 py-3.5 bg-green-500/10 border border-green-500/20 rounded-2xl">
-                      <div className="flex items-center gap-2 mb-0.5">
-                         <Check className="w-4 h-4 text-green-400" />
-                         <span className="text-[11px] font-lexend font-bold text-green-400 tracking-widest uppercase">İndirildi</span>
+                  <div className="flex flex-col gap-2">
+                    {hasNewChapters && (
+                      <button
+                        onClick={handleUpdateDownload}
+                        disabled={downloading}
+                        className={cn(
+                          "relative flex items-center justify-center gap-3 w-full py-4 rounded-2xl overflow-hidden transition-all group",
+                          downloading 
+                            ? "bg-brand-primary/20 border border-brand-primary/40 cursor-wait" 
+                            : "bg-brand-primary/10 border border-brand-primary/30 hover:bg-brand-primary/20 active:scale-[0.98]"
+                        )}
+                      >
+                        {downloading ? (
+                          <div className="flex items-center gap-2">
+                             <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
+                             <span className="text-[11px] font-lexend font-bold text-brand-primary tracking-widest uppercase">
+                               GÜNCELLENİYOR ({downloadProgress.current}/{downloadProgress.total})
+                             </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                             <Download className="w-4 h-4 text-brand-primary" />
+                             <span className="text-[11px] font-lexend font-bold text-brand-primary tracking-widest uppercase">
+                               YENİ BÖLÜMLERİ İNDİR ({missingChapters.length})
+                             </span>
+                          </div>
+                        )}
+                      </button>
+                    )}
+                    <div className="flex gap-2">
+                      <div className="flex-1 flex flex-col justify-center px-5 py-3.5 bg-green-500/10 border border-green-500/20 rounded-2xl">
+                        <div className="flex items-center gap-2 mb-0.5">
+                           <Check className="w-4 h-4 text-green-400" />
+                           <span className="text-[11px] font-lexend font-bold text-green-400 tracking-widest uppercase">İndirildi</span>
+                        </div>
+                        <span className="text-[9px] text-brand-text-muted uppercase tracking-wider pl-6">
+                           Çevrimdışı Okunabilir
+                        </span>
                       </div>
-                      <span className="text-[9px] text-brand-text-muted uppercase tracking-wider pl-6">
-                         Çevrimdışı Okunabilir
-                      </span>
+                      <button
+                        onClick={handleDeleteDownload}
+                        className="flex items-center justify-center w-14 rounded-2xl border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
+                        title="İndirmeyi Sil"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
                     </div>
-                    <button
-                      onClick={handleDeleteDownload}
-                      className="flex items-center justify-center w-14 rounded-2xl border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
-                      title="İndirmeyi Sil"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
                   </div>
                 )}
               </div>
