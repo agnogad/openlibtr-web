@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, LogOut, Settings, Check, Book, Trash2, Download } from 'lucide-react';
-import { motion } from 'motion/react';
+import { User, LogOut, Settings, Check, Book, Trash2, Download, RefreshCw, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { AppearanceSettings } from '../types';
 import { supabase } from '../lib/supabase';
@@ -21,6 +21,8 @@ export default function ProfilePage({
 }) {
   const [downloadedNovels, setDownloadedNovels] = useState<DownloadedNovel[]>([]);
   const [loadingDownloads, setLoadingDownloads] = useState(true);
+  const [isUpdatingAll, setIsUpdatingAll] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<{ current: number, total: number, message: string } | null>(null);
 
   useEffect(() => {
     offlineDB.getAllNovels().then(data => {
@@ -32,6 +34,68 @@ export default function ProfilePage({
   const handleDelete = async (slug: string) => {
     await offlineDB.deleteNovel(slug);
     setDownloadedNovels(prev => prev.filter(n => n.slug !== slug));
+  };
+
+  const handleUpdateAll = async () => {
+    if (downloadedNovels.length === 0 || isUpdatingAll) return;
+    
+    setIsUpdatingAll(true);
+    let updatedCount = 0;
+    let chaptersDownloaded = 0;
+
+    try {
+      const novels = await offlineDB.getAllNovels();
+      setUpdateStatus({ current: 0, total: novels.length, message: 'Noveller kontrol ediliyor...' });
+
+      for (let i = 0; i < novels.length; i++) {
+        const stored = novels[i];
+        setUpdateStatus({ current: i + 1, total: novels.length, message: `${stored.novel.title} kontrol ediliyor...` });
+
+        try {
+          const config = await api.getNovelConfig(stored.slug);
+          const storedPaths = Object.keys(stored.chapters);
+          const latestPaths = config.chapters.map(c => c.path);
+          const missing = latestPaths.filter(p => !storedPaths.includes(p));
+
+          if (missing.length > 0) {
+            updatedCount++;
+            setUpdateStatus({ current: i + 1, total: novels.length, message: `${stored.novel.title}: ${missing.length} yeni bölüm indiriliyor...` });
+
+            const newChapters = { ...stored.chapters };
+            for (const path of missing) {
+              const content = await api.getChapterContent(stored.slug, path);
+              newChapters[path] = content;
+              chaptersDownloaded++;
+            }
+
+            await offlineDB.saveNovel({
+              ...stored,
+              config,
+              chapters: newChapters,
+              downloadedAt: Date.now()
+            });
+          }
+        } catch (err) {
+          console.error(`Error updating ${stored.slug}:`, err);
+        }
+      }
+
+      // Refresh list
+      const finalNovels = await offlineDB.getAllNovels();
+      setDownloadedNovels(finalNovels);
+
+      if (updatedCount > 0) {
+        alert(`${updatedCount} novel güncellendi! Toplam ${chaptersDownloaded} yeni bölüm indirildi.`);
+      } else {
+        alert('Tüm noveller güncel! Yeni bölüm bulunamadı.');
+      }
+    } catch (error) {
+      console.error("Bulk update error:", error);
+      alert('Güncelleme sırasında bir hata oluştu.');
+    } finally {
+      setIsUpdatingAll(false);
+      setUpdateStatus(null);
+    }
   };
 
   const handleLogout = async () => {
@@ -175,17 +239,65 @@ export default function ProfilePage({
 
       {/* Downloads Section */}
       <div className="mt-12 space-y-8">
-        <div className="flex items-center justify-between px-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary">
               <Download className="w-6 h-6" />
             </div>
             <h3 className="text-2xl font-lexend font-bold text-white">İndirilenler</h3>
           </div>
-          <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">
-            {downloadedNovels.length} NOVEL
-          </span>
+          
+          <div className="flex items-center gap-3">
+            {downloadedNovels.length > 0 && (
+              <button
+                onClick={handleUpdateAll}
+                disabled={isUpdatingAll}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 rounded-xl font-lexend font-bold text-xs uppercase tracking-widest transition-all",
+                  isUpdatingAll 
+                    ? "bg-brand-primary/20 text-brand-primary cursor-wait" 
+                    : "bg-brand-surface-variant/20 text-white hover:bg-brand-primary hover:text-brand-bg shadow-sm"
+                )}
+              >
+                {isUpdatingAll ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                HEPSİNİ GÜNCELLE
+              </button>
+            )}
+            <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">
+              {downloadedNovels.length} NOVEL
+            </span>
+          </div>
         </div>
+
+        <AnimatePresence>
+          {updateStatus && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="m3-card p-4 bg-brand-primary/5 border-brand-primary/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-lexend font-bold text-brand-primary uppercase tracking-widest">GÜNCELLEME SÜRÜYOR</span>
+                  <span className="text-[10px] font-mono text-brand-primary">{updateStatus.current} / {updateStatus.total}</span>
+                </div>
+                <div className="h-1.5 w-full bg-brand-primary/10 rounded-full overflow-hidden mb-2">
+                  <motion.div 
+                    className="h-full bg-brand-primary"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${(updateStatus.current / updateStatus.total) * 100}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-brand-text-muted font-lexend">{updateStatus.message}</p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {loadingDownloads ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
