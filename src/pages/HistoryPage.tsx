@@ -30,6 +30,18 @@ export default function HistoryPage({ session }: { session: Session | null }) {
 
   return (
     <div className="max-w-3xl mx-auto py-10 px-4">
+      {!session && (
+        <div className="mb-8 p-4 rounded-[16px] bg-brand-primary-container/20 border border-brand-primary/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex-1">
+            <h3 className="font-lexend font-bold text-brand-primary mb-1">Cihazlar Arası Senkronizasyon</h3>
+            <p className="text-xs font-lexend text-brand-text-muted">Okuma geçmişinizi diğer cihazlarınızla senkronize etmek için giriş yapın.</p>
+          </div>
+          <Link to="/login" className="px-5 py-2 bg-brand-primary text-brand-bg text-xs font-lexend font-bold rounded-full whitespace-nowrap hover:brightness-110 transition-all">
+            Giriş Yap
+          </Link>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-brand-primary-container/20 rounded-2xl text-brand-primary">

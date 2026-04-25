@@ -15,7 +15,7 @@ export default function ProfilePage({
   appearance, 
   setAppearance 
 }: { 
-  session: Session, 
+  session: Session | null, 
   appearance: AppearanceSettings, 
   setAppearance: (a: AppearanceSettings) => void 
 }) {
@@ -61,16 +61,30 @@ export default function ProfilePage({
           <div className="w-24 h-24 rounded-full bg-brand-primary-container flex items-center justify-center mb-6 shadow-md border-4 border-brand-surface">
             <User className="text-brand-on-primary-container w-12 h-12" />
           </div>
-          <h2 className="text-3xl font-lexend font-bold text-white mb-2">Profil Ayarları</h2>
-          <p className="text-brand-text-muted font-lexend text-sm mb-8 tracking-wide">{session.user.email}</p>
+          <h2 className="text-3xl font-lexend font-bold text-white mb-2">{session ? 'Profil Ayarları' : 'Misafir Kullanıcı'}</h2>
           
-          <button 
-            onClick={handleLogout}
-            className="px-10 py-3 rounded-full border border-red-400 text-red-400 font-lexend font-bold text-sm tracking-wide hover:bg-red-400/10 transition-all flex items-center gap-2"
-          >
-            <LogOut className="w-4 h-4" />
-            PROFİLDEN AYRIL
-          </button>
+          {session ? (
+            <>
+              <p className="text-brand-text-muted font-lexend text-sm mb-8 tracking-wide">{session.user.email}</p>
+              <button 
+                onClick={handleLogout}
+                className="px-10 py-3 rounded-full border border-red-400 text-red-400 font-lexend font-bold text-sm tracking-wide hover:bg-red-400/10 transition-all flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                PROFİLDEN AYRIL
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-brand-text-muted font-lexend text-sm mb-8 tracking-wide max-w-sm">Geçmişinizi ve cihazlar arası senkronizasyon özelliklerini kullanmak için giriş yapın.</p>
+              <Link 
+                to="/login"
+                className="px-10 py-3 bg-brand-primary text-brand-bg font-lexend font-bold text-sm tracking-wide rounded-full shadow-lg hover:brightness-110 active:scale-95 transition-all"
+              >
+                GİRİŞ YAP / KAYIT OL
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Primary Color Selector */}

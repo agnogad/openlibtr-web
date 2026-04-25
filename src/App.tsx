@@ -71,7 +71,7 @@ function BottomNav({ session }: { session: Session | null }) {
   const navItems = [
     { name: 'Ana Sayfa', path: '/', icon: Home },
     { name: 'Geçmiş', path: '/history', icon: HistoryIcon },
-    { name: session ? 'Profil' : 'Giriş', path: '/profile', icon: User },
+    { name: 'Profil', path: '/profile', icon: User },
   ];
 
   return (
@@ -116,7 +116,7 @@ function SideNav({
   const menuItems = [
     { name: 'Ana Sayfa', path: '/', icon: Home },
     { name: 'Geçmiş', path: '/history', icon: HistoryIcon },
-    { name: session ? 'Profil' : 'Giriş', path: '/profile', icon: User },
+    { name: 'Profil', path: '/profile', icon: User },
   ];
 
   return (
@@ -342,8 +342,8 @@ export default function App() {
                     <Route path="/login" element={session ? <Navigate to="/profile" /> : <AuthPage />} />
                     
                     {/* Protected Routes */}
-                    <Route path="/history" element={session ? <HistoryPage session={session} /> : <Navigate to="/login" />} />
-                    <Route path="/profile" element={session ? <ProfilePage session={session} appearance={appearance} setAppearance={setAppearance} /> : <Navigate to="/login" />} />
+                    <Route path="/history" element={<HistoryPage session={session} />} />
+                    <Route path="/profile" element={<ProfilePage session={session} appearance={appearance} setAppearance={setAppearance} />} />
 
                     {/* Redirect any other path to home */}
                     <Route path="*" element={<Navigate to="/" />} />
