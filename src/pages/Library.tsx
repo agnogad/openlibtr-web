@@ -16,7 +16,13 @@ export default function Library({ search, setSearch }: { search: string, setSear
 
   useEffect(() => {
     api.getLibrary().then(data => {
-      setNovels(data);
+      // Sort by lastUpdated, newest first
+      const sortedNovels = [...data].sort((a, b) => {
+        const dateA = new Date(a.lastUpdated).getTime();
+        const dateB = new Date(b.lastUpdated).getTime();
+        return dateB - dateA;
+      });
+      setNovels(sortedNovels);
       setLoading(false);
     });
     setResume(storage.getResume());
@@ -138,10 +144,10 @@ export default function Library({ search, setSearch }: { search: string, setSear
         </div>
       )}
 
-      {/* Popüler Noveller Grid */}
+      {/* Son Güncellemeler Grid */}
       <div>
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-lexend font-bold text-white">Popüler Noveller</h2>
+          <h2 className="text-2xl font-lexend font-bold text-white">Son Güncellemeler</h2>
           <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{novels.length} TOPLAM</span>
         </div>
 
@@ -213,8 +219,20 @@ export default function Library({ search, setSearch }: { search: string, setSear
                   <h3 className="font-lexend font-bold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
                     {novel.title}
                   </h3>
-                  <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide">
+                  <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide flex items-center gap-2">
                     {novel.chapterCount} Bölüm
+                    {(() => {
+                      const today = new Date();
+                      const updateDate = new Date(novel.lastUpdated);
+                      const isToday = updateDate.getDate() === today.getDate() &&
+                                     updateDate.getMonth() === today.getMonth() &&
+                                     updateDate.getFullYear() === today.getFullYear();
+                      return isToday && (
+                        <span className="px-1.5 py-0.5 bg-brand-primary/20 text-brand-primary text-[9px] font-bold rounded ring-1 ring-brand-primary/30">
+                          GÜNCELLENDİ
+                        </span>
+                      );
+                    })()}
                   </p>
                 </Link>
               </motion.div>
