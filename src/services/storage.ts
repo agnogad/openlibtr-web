@@ -40,7 +40,12 @@ export const storage = {
 
   getReadingSettings: (): ReadingSettings => {
     const data = localStorage.getItem(READING_SETTINGS_KEY);
-    return data ? JSON.parse(data) : { fontSize: 18, fontFamily: 'Lexend' };
+    return data ? JSON.parse(data) : { 
+      fontSize: 18, 
+      fontFamily: 'Lexend',
+      backgroundColor: '#000000',
+      textColor: '#ffffff'
+    };
   },
 
   saveAppearanceSettings: (settings: AppearanceSettings) => {

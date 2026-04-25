@@ -33,6 +33,8 @@ export interface ResumeData {
 export interface ReadingSettings {
   fontSize: number;
   fontFamily: 'Lexend' | 'Inter' | 'Serif' | 'Mono';
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 export interface Bookmark {

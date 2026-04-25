@@ -126,25 +126,34 @@ export default function Reader({ session }: { session: Session | null }) {
   const paginatedQuickChapters = filteredQuickChapters.slice((chapterPage - 1) * quickPageSize, chapterPage * quickPageSize);
 
   return (
-    <div className="min-h-screen bg-brand-bg flex flex-col">
+    <div 
+      className="min-h-screen flex flex-col transition-colors duration-300"
+      style={{ backgroundColor: readerSettings.backgroundColor || '#000000' }}
+    >
       {/* Scroll Progress Bar */}
       <div 
         className="fixed top-0 left-0 h-1 bg-brand-primary z-[60] transition-all duration-150" 
         style={{ width: `${scrollProgress}%` }}
       />
       
-      <nav className="glass-header h-16 flex items-center shrink-0 border-b border-brand-border/20 content-visibility-auto">
+      <nav 
+        className="glass-header h-16 flex items-center shrink-0 border-b border-brand-border/20 content-visibility-auto"
+        style={{ 
+          backgroundColor: readerSettings.backgroundColor ? `${readerSettings.backgroundColor}F2` : 'rgba(0, 0, 0, 0.95)',
+          borderColor: `${readerSettings.textColor}20` 
+        }}
+      >
         <div className="container mx-auto px-2 sm:px-4 flex items-center justify-between gap-2">
           <Link 
             to={`/novel/${slug}`}
             className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full hover:bg-brand-surface-variant/30 transition-all"
           >
-            <ArrowLeft className="w-6 h-6 text-brand-text-main" />
+            <ArrowLeft className="w-6 h-6" style={{ color: readerSettings.textColor }} />
           </Link>
           
           <div className="flex-1 min-w-0 px-2 text-center">
-            <h2 className="text-xs sm:text-sm font-lexend font-bold text-white truncate max-w-[180px] sm:max-w-none mx-auto">{novel.title}</h2>
-            <p className="text-[10px] sm:text-[11px] text-brand-primary font-bold uppercase tracking-widest leading-none mt-1">BÖLÜM {chapterId}</p>
+            <h2 className="text-xs sm:text-sm font-lexend font-bold truncate max-w-[180px] sm:max-w-none mx-auto" style={{ color: readerSettings.textColor }}>{novel.title}</h2>
+            <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest leading-none mt-1" style={{ color: readerSettings.textColor, opacity: 0.8 }}>BÖLÜM {chapterId}</p>
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
@@ -152,8 +161,9 @@ export default function Reader({ session }: { session: Session | null }) {
               onClick={() => setShowChapters(!showChapters)}
               className={cn(
                 "p-2 rounded-full transition-all",
-                showChapters ? "bg-brand-primary text-brand-bg" : "text-brand-text-main hover:bg-brand-surface-variant/20"
+                showChapters ? "bg-brand-primary text-brand-bg" : "hover:bg-brand-surface-variant/20"
               )}
+              style={!showChapters ? { color: readerSettings.textColor } : {}}
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -161,8 +171,9 @@ export default function Reader({ session }: { session: Session | null }) {
               onClick={() => setShowSettings(!showSettings)}
               className={cn(
                 "p-2 rounded-full transition-all",
-                showSettings ? "bg-brand-primary text-brand-bg" : "text-brand-text-main hover:bg-brand-surface-variant/20"
+                showSettings ? "bg-brand-primary text-brand-bg" : "hover:bg-brand-surface-variant/20"
               )}
+              style={!showSettings ? { color: readerSettings.textColor } : {}}
             >
               <Settings className="w-6 h-6" />
             </button>
@@ -311,6 +322,71 @@ export default function Reader({ session }: { session: Session | null }) {
                     ))}
                   </div>
                 </div>
+
+                <div className="space-y-4">
+                  <label className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider block">Renk Temaları</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { name: 'Karanlık', bg: '#1c1b1f', text: '#e1e1e1' },
+                      { name: 'Pitch', bg: '#000000', text: '#ffffff' },
+                      { name: 'Sepia', bg: '#f4ecd8', text: '#5b4636' },
+                      { name: 'Aydınlık', bg: '#ffffff', text: '#1c1b1f' }
+                    ].map((theme) => (
+                      <button
+                        key={theme.name}
+                        onClick={() => {
+                          const newSettings = { ...readerSettings, backgroundColor: theme.bg, textColor: theme.text };
+                          setReaderSettings(newSettings);
+                          storage.saveReadingSettings(newSettings);
+                        }}
+                        className={cn(
+                          "flex-1 min-w-[80px] py-2 rounded-xl border flex flex-col items-center gap-1 transition-all",
+                          readerSettings.backgroundColor === theme.bg
+                            ? "border-brand-primary ring-1 ring-brand-primary"
+                            : "border-brand-border/40"
+                        )}
+                        style={{ backgroundColor: theme.bg }}
+                      >
+                         <span className="text-[10px] font-bold" style={{ color: theme.text }}>{theme.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest block">Arka Plan</label>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="color" 
+                        value={readerSettings.backgroundColor || '#000000'}
+                        onChange={(e) => {
+                          const newSettings = { ...readerSettings, backgroundColor: e.target.value };
+                          setReaderSettings(newSettings);
+                          storage.saveReadingSettings(newSettings);
+                        }}
+                        className="w-10 h-10 rounded-lg overflow-hidden bg-transparent border-none cursor-pointer p-0"
+                      />
+                      <span className="text-[10px] font-mono text-brand-text-muted uppercase">{readerSettings.backgroundColor || '#000000'}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest block">Yazı Rengi</label>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="color" 
+                        value={readerSettings.textColor || '#ffffff'}
+                        onChange={(e) => {
+                          const newSettings = { ...readerSettings, textColor: e.target.value };
+                          setReaderSettings(newSettings);
+                          storage.saveReadingSettings(newSettings);
+                        }}
+                        className="w-10 h-10 rounded-lg overflow-hidden bg-transparent border-none cursor-pointer p-0"
+                      />
+                      <span className="text-[10px] font-mono text-brand-text-muted uppercase">{readerSettings.textColor || '#ffffff'}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
@@ -321,16 +397,25 @@ export default function Reader({ session }: { session: Session | null }) {
         {/* Reading Meta */}
         <div className="flex items-center justify-between mb-8 px-2">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-widest">
+            <div 
+              className="flex items-center gap-1.5 text-xs font-lexend font-bold uppercase tracking-widest"
+              style={{ color: readerSettings.textColor, opacity: 0.6 }}
+            >
               <Clock className="w-3.5 h-3.5 text-brand-primary" />
               {time} Dakika Okuma
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-widest">
+            <div 
+              className="hidden sm:flex items-center gap-1.5 text-xs font-lexend font-bold uppercase tracking-widest"
+              style={{ color: readerSettings.textColor, opacity: 0.6 }}
+            >
               <Book className="w-3.5 h-3.5 text-brand-primary" />
               {words} Kelime
             </div>
           </div>
-          <div className="text-[10px] sm:text-xs font-mono text-brand-primary/60">
+          <div 
+            className="text-[10px] sm:text-xs font-mono"
+            style={{ color: readerSettings.textColor, opacity: 0.4 }}
+          >
             {Math.round(scrollProgress)}% BİTTİ
           </div>
         </div>
@@ -343,7 +428,10 @@ export default function Reader({ session }: { session: Session | null }) {
             readerSettings.fontFamily === 'Serif' && "font-serif",
             readerSettings.fontFamily === 'Mono' && "font-mono"
           )}
-          style={{ fontSize: `${readerSettings.fontSize}px` }}
+          style={{ 
+            fontSize: `${readerSettings.fontSize}px`,
+            color: readerSettings.textColor || '#ffffff'
+          }}
           dangerouslySetInnerHTML={{ __html: htmlContent }} 
         />
 
@@ -373,8 +461,11 @@ export default function Reader({ session }: { session: Session | null }) {
         <Giscus slug={slug!} chapterId={parseInt(chapterId!)} />
       </main>
 
-      <footer className="py-12 border-t border-brand-border/10 bg-brand-surface/20 text-center">
-        <p className="text-[11px] font-lexend font-bold tracking-widest text-brand-text-muted uppercase">
+      <footer className="py-12 border-t border-brand-border/10 bg-brand-surface/20 text-center" style={{ borderColor: `${readerSettings.textColor}10` }}>
+        <p 
+          className="text-[11px] font-lexend font-bold tracking-widest uppercase"
+          style={{ color: readerSettings.textColor, opacity: 0.5 }}
+        >
           &copy; 2026 OKUTTUR &bull; Dark Mode Material Experience
         </p>
       </footer>

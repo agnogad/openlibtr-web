@@ -86,7 +86,7 @@
 }
 
 .markdown-body h1, .markdown-body h2, .markdown-body h3 {
-  @apply font-display font-medium mt-8 mb-4 text-white tracking-tight;
+  @apply font-display font-medium mt-8 mb-4 tracking-tight;
 }
 
 .markdown-body hr {
