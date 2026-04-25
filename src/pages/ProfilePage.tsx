@@ -52,7 +52,7 @@ export default function ProfilePage({
         setUpdateStatus({ current: i + 1, total: novels.length, message: `${stored.novel.title} kontrol ediliyor...` });
 
         try {
-          const config = await api.getNovelConfig(stored.slug);
+          const config = await api.getNovelConfig(stored.slug, true);
           const storedPaths = Object.keys(stored.chapters);
           const latestPaths = config.chapters.map(c => c.path);
           const missing = latestPaths.filter(p => !storedPaths.includes(p));

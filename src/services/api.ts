@@ -33,7 +33,14 @@ const fetchWithCache = async <T>(key: string, fetchFn: () => Promise<T>): Promis
 };
 
 export const api = {
-  getLibrary: async (): Promise<Novel[]> => {
+  getLibrary: async (bypassCache = false): Promise<Novel[]> => {
+    if (bypassCache) {
+      const response = await fetch(`${BASE_URL}/library.json?t=${Date.now()}`);
+      if (!response.ok) throw new Error('Could not fetch library');
+      const data = await response.json();
+      cache['library'] = { timestamp: Date.now(), data };
+      return data;
+    }
     return fetchWithCache('library', async () => {
       const response = await fetch(`${BASE_URL}/library.json`);
       if (!response.ok) throw new Error('Could not fetch library');
@@ -58,10 +65,20 @@ export const api = {
     return undefined;
   },
 
-  getNovelConfig: async (slug: string): Promise<NovelConfig> => {
-    // Check offline DB first
-    const offline = await offlineDB.getNovel(slug);
-    if (offline) return offline.config;
+  getNovelConfig: async (slug: string, bypassCache = false): Promise<NovelConfig> => {
+    if (!bypassCache) {
+      // Check offline DB first
+      const offline = await offlineDB.getNovel(slug);
+      if (offline) return offline.config;
+    }
+
+    if (bypassCache) {
+      const response = await fetch(`${BASE_URL}/books/${slug}/config.json?t=${Date.now()}`);
+      if (!response.ok) throw new Error('Could not fetch novel config');
+      const data = await response.json();
+      cache[`config-${slug}`] = { timestamp: Date.now(), data };
+      return data;
+    }
 
     return fetchWithCache(`config-${slug}`, async () => {
       const response = await fetch(`${BASE_URL}/books/${slug}/config.json`);

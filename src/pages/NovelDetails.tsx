@@ -29,7 +29,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
     if (!slug) return;
     setBookmarked(storage.isBookmarked(slug));
     Promise.all([
-      api.getNovelConfig(slug),
+      api.getNovelConfig(slug, true),
       api.getNovel(slug),
       offlineDB.getNovel(slug)
     ]).then(([conf, nav, storedNovel]) => {
@@ -112,10 +112,11 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   };
 
   const handleUpdateDownload = async () => {
-    if (!config || !novel || !slug || missingChapters.length === 0) return;
+    if (!novel || !slug || missingChapters.length === 0) return;
     setDownloading(true);
     
     try {
+      const config = await api.getNovelConfig(slug, true);
       const storedNovel = await offlineDB.getNovel(slug);
       if (!storedNovel) throw new Error("Local copy not found");
 
