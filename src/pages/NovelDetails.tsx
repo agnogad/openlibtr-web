@@ -186,76 +186,74 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                 </Link>
               )}
 
-              {session && (
-                <div className="pt-2">
-                  {!isDownloaded ? (
-                    <button
-                      onClick={handleDownload}
-                      disabled={downloading}
-                      className={cn(
-                        "relative flex items-center justify-center gap-3 w-full py-5 rounded-2xl overflow-hidden transition-all group",
-                        downloading 
-                          ? "bg-brand-surface-variant/40 border border-brand-primary/20 cursor-wait" 
-                          : "bg-brand-surface-variant/20 border border-brand-border/30 hover:border-brand-primary/50 hover:bg-brand-primary/10 active:scale-[0.98]"
-                      )}
-                    >
-                      {downloading ? (
-                        <>
-                          {/* Animated Progress Background */}
-                          <div 
-                            className="absolute inset-y-0 left-0 bg-brand-primary/20 transition-all duration-300 ease-out" 
-                            style={{ width: `${(downloadProgress.current / downloadProgress.total) * 100}%` }}
-                          />
-                          <div className="relative flex items-center justify-center gap-3 w-full z-10">
-                            <Loader2 className="w-5 h-5 animate-spin text-brand-primary" />
-                            <div className="flex flex-col items-start text-left">
-                              <span className="text-[11px] font-lexend font-bold text-white tracking-widest uppercase">
-                                İndiriliyor
-                              </span>
-                              <span className="text-[9px] text-brand-text-muted uppercase tracking-widest">
-                                {downloadProgress.current} / {downloadProgress.total} BÖLÜM
-                              </span>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform duration-300">
-                             <Download className="w-5 h-5" />
-                          </div>
+              <div className="pt-2">
+                {!isDownloaded ? (
+                  <button
+                    onClick={handleDownload}
+                    disabled={downloading}
+                    className={cn(
+                      "relative flex items-center justify-center gap-3 w-full py-5 rounded-2xl overflow-hidden transition-all group",
+                      downloading 
+                        ? "bg-brand-surface-variant/40 border border-brand-primary/20 cursor-wait" 
+                        : "bg-brand-surface-variant/20 border border-brand-border/30 hover:border-brand-primary/50 hover:bg-brand-primary/10 active:scale-[0.98]"
+                    )}
+                  >
+                    {downloading ? (
+                      <>
+                        {/* Animated Progress Background */}
+                        <div 
+                          className="absolute inset-y-0 left-0 bg-brand-primary/20 transition-all duration-300 ease-out" 
+                          style={{ width: `${(downloadProgress.current / downloadProgress.total) * 100}%` }}
+                        />
+                        <div className="relative flex items-center justify-center gap-3 w-full z-10">
+                          <Loader2 className="w-5 h-5 animate-spin text-brand-primary" />
                           <div className="flex flex-col items-start text-left">
-                            <span className="text-xs font-lexend font-bold text-white tracking-wide">
-                              Çevrimdışı Oku
+                            <span className="text-[11px] font-lexend font-bold text-white tracking-widest uppercase">
+                              İndiriliyor
                             </span>
-                            <span className="text-[10px] text-brand-text-muted uppercase tracking-wider">
-                              Cihazına İndir
+                            <span className="text-[9px] text-brand-text-muted uppercase tracking-widest">
+                              {downloadProgress.current} / {downloadProgress.total} BÖLÜM
                             </span>
                           </div>
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <div className="flex-1 flex flex-col justify-center px-5 py-3.5 bg-green-500/10 border border-green-500/20 rounded-2xl">
-                        <div className="flex items-center gap-2 mb-0.5">
-                           <Check className="w-4 h-4 text-green-400" />
-                           <span className="text-[11px] font-lexend font-bold text-green-400 tracking-widest uppercase">İndirildi</span>
                         </div>
-                        <span className="text-[9px] text-brand-text-muted uppercase tracking-wider pl-6">
-                           Çevrimdışı Okunabilir
-                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:scale-110 transition-transform duration-300">
+                           <Download className="w-5 h-5" />
+                        </div>
+                        <div className="flex flex-col items-start text-left">
+                          <span className="text-xs font-lexend font-bold text-white tracking-wide">
+                            Çevrimdışı Oku
+                          </span>
+                          <span className="text-[10px] text-brand-text-muted uppercase tracking-wider">
+                            Cihazına İndir
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="flex-1 flex flex-col justify-center px-5 py-3.5 bg-green-500/10 border border-green-500/20 rounded-2xl">
+                      <div className="flex items-center gap-2 mb-0.5">
+                         <Check className="w-4 h-4 text-green-400" />
+                         <span className="text-[11px] font-lexend font-bold text-green-400 tracking-widest uppercase">İndirildi</span>
                       </div>
-                      <button
-                        onClick={handleDeleteDownload}
-                        className="flex items-center justify-center w-14 rounded-2xl border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
-                        title="İndirmeyi Sil"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
+                      <span className="text-[9px] text-brand-text-muted uppercase tracking-wider pl-6">
+                         Çevrimdışı Okunabilir
+                      </span>
                     </div>
-                  )}
-                </div>
-              )}
+                    <button
+                      onClick={handleDeleteDownload}
+                      className="flex items-center justify-center w-14 rounded-2xl border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
+                      title="İndirmeyi Sil"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
