@@ -49,8 +49,8 @@ export const storage = {
     return data ? JSON.parse(data) : { 
       fontSize: 18, 
       fontFamily: 'Lexend',
-      backgroundColor: '#000000',
-      textColor: '#ffffff'
+      backgroundColor: '#1c1b1f',
+      textColor: '#e1e1e1'
     };
   },
 
@@ -60,7 +60,7 @@ export const storage = {
 
   getAppearanceSettings: (): AppearanceSettings => {
     const data = localStorage.getItem(APPEARANCE_SETTINGS_KEY);
-    return data ? JSON.parse(data) : { primaryColor: '#ffffff', theme: 'pitch' };
+    return data ? JSON.parse(data) : { primaryColor: '#d0bcff', theme: 'material' };
   },
 
   getBookmarks: (): any[] => {
