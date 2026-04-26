@@ -9,6 +9,7 @@ import { storage } from '../services/storage';
 import { offlineDB, DownloadedNovel } from '../services/db';
 import { api } from '../services/api';
 import { cn } from '../lib/utils';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function ProfilePage({ 
   session, 
@@ -23,6 +24,7 @@ export default function ProfilePage({
   const [loadingDownloads, setLoadingDownloads] = useState(true);
   const [isUpdatingAll, setIsUpdatingAll] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<{ current: number, total: number, message: string } | null>(null);
+  const [slugToDelete, setSlugToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     offlineDB.getAllNovels().then(data => {
@@ -120,6 +122,15 @@ export default function ProfilePage({
 
   return (
     <div className="max-w-2xl mx-auto py-10 px-4 pb-32">
+      <ConfirmModal
+        isOpen={!!slugToDelete}
+        onClose={() => setSlugToDelete(null)}
+        onConfirm={() => slugToDelete && handleDelete(slugToDelete)}
+        title="İndirmeyi Sil"
+        message={`"${downloadedNovels.find(n => n.slug === slugToDelete)?.novel.title}" çevrimdışı arşivden silinecek. Bölümleri tekrar okumak için internet bağlantısı gerekecek.`}
+        confirmText="İndirmeyi Sil"
+      />
+
       <div className="space-y-10">
         <div className="m3-card p-10 flex flex-col items-center text-center">
           <div className="w-24 h-24 rounded-full bg-brand-primary-container flex items-center justify-center mb-6 shadow-md border-4 border-brand-surface">
@@ -353,7 +364,7 @@ export default function ProfilePage({
                      KİTABA GİT
                    </Link>
                    <button
-                    onClick={() => handleDelete(download.slug)}
+                    onClick={() => setSlugToDelete(download.slug)}
                     className="p-3 rounded-xl border border-brand-border/30 text-brand-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 transition-all"
                     title="İndirmeyi Klasörden Sil"
                    >

@@ -7,6 +7,7 @@ import { Novel, NovelConfig, HistoryItem, ResumeData } from '../types';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
 import { offlineDB } from '../services/db';
+import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function NovelDetails({ session }: { session: Session | null }) {
   const { slug } = useParams();
@@ -23,6 +24,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
   const [bookmarked, setBookmarked] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const pageSize = 48;
 
   useEffect(() => {
@@ -196,6 +198,15 @@ export default function NovelDetails({ session }: { session: Session | null }) {
 
   return (
     <div className="flex flex-col md:flex-row gap-12 px-2 sm:px-6">
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteDownload}
+        title="İndirmeyi Sil"
+        message={`"${novel.title}" çevrimdışı arşivden silinecek. Bölümleri tekrar okumak için internet bağlantısı gerekecek.`}
+        confirmText="İndirmeyi Sil"
+      />
+
       {/* Novel Header Info */}
       <div className="w-full md:w-80 shrink-0">
         <div className="sticky top-10 space-y-8">
@@ -338,7 +349,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                         </span>
                       </div>
                       <button
-                        onClick={handleDeleteDownload}
+                        onClick={() => setIsDeleteModalOpen(true)}
                         className="flex items-center justify-center w-14 rounded-2xl border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition-all hover:scale-105 active:scale-95"
                         title="İndirmeyi Sil"
                       >

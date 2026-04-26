@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Play, ChevronLeft, ChevronRight, Book } from 'lucide-react';
+import { Search, Play, ChevronLeft, ChevronRight, Book, Download } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Novel, ResumeData } from '../types';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
+import { offlineDB } from '../services/db';
 
 export default function Library({ search, setSearch }: { search: string, setSearch: (s: string) => void }) {
   const [novels, setNovels] = useState<Novel[]>([]);
+  const [downloadedSlugs, setDownloadedSlugs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [resume, setResume] = useState<ResumeData | null>(null);
   const [page, setPage] = useState(1);
@@ -15,7 +17,12 @@ export default function Library({ search, setSearch }: { search: string, setSear
   const pageSize = 20;
 
   useEffect(() => {
-    api.getLibrary().then(data => {
+    Promise.all([
+      api.getLibrary(),
+      offlineDB.getAllNovels()
+    ]).then(([data, offlineNovels]) => {
+      setDownloadedSlugs(offlineNovels.map(n => n.slug));
+      
       // Sort by lastUpdated, newest first
       const sortedNovels = [...data].sort((a, b) => {
         const dateA = new Date(a.lastUpdated).getTime();
@@ -220,7 +227,12 @@ export default function Library({ search, setSearch }: { search: string, setSear
                     {novel.title}
                   </h3>
                   <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide flex items-center gap-2">
-                    {novel.chapterCount} Bölüm
+                    <span className="flex items-center gap-1">
+                      {novel.chapterCount} Bölüm
+                      {downloadedSlugs.includes(novel.slug) && (
+                        <Download className="w-2.5 h-2.5 text-green-400" />
+                      )}
+                    </span>
                     {(() => {
                       const today = new Date();
                       const updateDate = new Date(novel.lastUpdated);

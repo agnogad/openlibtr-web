@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
-  ArrowLeft, ArrowUp, Search, Menu, X, Settings, ChevronLeft, ChevronRight, Book, Clock 
+  ArrowLeft, ArrowUp, Search, Menu, X, Settings, ChevronLeft, ChevronRight, Book, Clock, AlertCircle 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { marked } from 'marked';
@@ -25,6 +25,7 @@ const calculateReadingTime = (text: string) => {
 
 export default function Reader({ session }: { session: Session | null }) {
   const { slug, chapterId } = useParams();
+  const navigate = useNavigate();
   const [novel, setNovel] = useState<Novel | null>(null);
   const [config, setConfig] = useState<NovelConfig | null>(null);
   const [chapter, setChapter] = useState<string>('');
@@ -36,12 +37,14 @@ export default function Reader({ session }: { session: Session | null }) {
   const [chapterPage, setChapterPage] = useState(1);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [resumePrompt, setResumePrompt] = useState<{ chapterId: number } | null>(null);
+  const [hasSavedHistory, setHasSavedHistory] = useState(false);
   const quickPageSize = 60;
 
   useEffect(() => {
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (window.scrollY / totalHeight) * 100;
+      const progress = totalHeight <= 0 ? 100 : (window.scrollY / totalHeight) * 100;
       setScrollProgress(progress);
       setShowBackToTop(window.scrollY > 500);
     };
@@ -50,9 +53,51 @@ export default function Reader({ session }: { session: Session | null }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Save history logic when threshold reached
+  useEffect(() => {
+    if (scrollProgress >= 70 && !hasSavedHistory && novel && slug && chapterId) {
+      setHasSavedHistory(true);
+      const currentChapterId = parseInt(chapterId);
+      const historyItem = {
+        slug,
+        novelTitle: novel.title,
+        chapterId: currentChapterId,
+        timestamp: Date.now()
+      };
+      
+      storage.saveHistory(historyItem);
+      storage.saveResume({
+        slug,
+        novelTitle: novel.title,
+        chapterId: currentChapterId
+      });
+
+      if (session) {
+        syncService.saveHistory(session.user.id, historyItem);
+      }
+    }
+  }, [scrollProgress, hasSavedHistory, novel, slug, chapterId, session]);
+
   useEffect(() => {
     if (!slug || !chapterId) return;
     setLoading(true);
+    setHasSavedHistory(false);
+    
+    // Check for resume *before* loading new content
+    const existingResume = storage.getResume();
+    const currentChapterId = parseInt(chapterId);
+
+    if (existingResume && existingResume.slug === slug) {
+      const diff = currentChapterId - existingResume.chapterId;
+      // Show prompt if we are behind OR more than 1 chapter ahead
+      if (diff < 0 || diff > 1) {
+        setResumePrompt({ chapterId: existingResume.chapterId });
+      } else {
+        setResumePrompt(null);
+      }
+    } else {
+      setResumePrompt(null);
+    }
     
     Promise.all([
       api.getNovelConfig(slug),
@@ -61,30 +106,13 @@ export default function Reader({ session }: { session: Session | null }) {
       setConfig(conf);
       setNovel(nav || null);
       
-      const targetCh = conf.chapters.find(c => c.id === parseInt(chapterId));
+      const targetCh = conf.chapters.find(c => c.id === currentChapterId);
       if (targetCh) {
         api.getChapterContent(slug, targetCh.path).then(content => {
           setChapter(content);
           setLoading(false);
           if (nav) {
             document.title = `${nav.title} - Bölüm ${chapterId} | OKUTTUR`;
-            const historyItem = {
-              slug,
-              novelTitle: nav.title,
-              chapterId: parseInt(chapterId),
-              timestamp: Date.now()
-            };
-            
-            storage.saveHistory(historyItem);
-            storage.saveResume({
-              slug,
-              novelTitle: nav.title,
-              chapterId: parseInt(chapterId)
-            });
-
-            if (session) {
-              syncService.saveHistory(session.user.id, historyItem);
-            }
           }
         });
       } else {
@@ -136,6 +164,47 @@ export default function Reader({ session }: { session: Session | null }) {
         style={{ width: `${scrollProgress}%` }}
       />
       
+      {/* Resume Jump Prompt */}
+      <AnimatePresence>
+        {resumePrompt && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-80 z-[70]"
+          >
+            <div className="bg-brand-surface border border-brand-primary/30 p-4 rounded-2xl shadow-2xl shadow-brand-primary/10">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary shrink-0">
+                  <AlertCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-[13px] font-lexend font-bold text-white mb-1 uppercase tracking-wide">Okuma Konumu</h4>
+                  <p className="text-[11px] text-brand-text-muted leading-relaxed font-medium">
+                    Kaldığınız yer <span className="text-brand-primary font-bold">Bölüm {resumePrompt.chapterId}</span>. 
+                    {parseInt(chapterId!) < resumePrompt.chapterId ? ' Ama şu an eski bir bölümdesiniz.' : ' Ama şu an daha ilerideki/farklı bir bölümdesiniz.'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate(`/read/${slug}/${resumePrompt.chapterId}`)}
+                  className="flex-1 py-2.5 bg-brand-primary text-brand-bg rounded-xl text-[11px] font-lexend font-bold uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all"
+                >
+                  Bölüme Git
+                </button>
+                <button
+                  onClick={() => setResumePrompt(null)}
+                  className="px-4 py-2.5 bg-brand-surface-variant/20 text-brand-text-muted rounded-xl text-[11px] font-lexend font-bold uppercase tracking-widest hover:bg-brand-surface-variant/30 active:scale-[0.98] transition-all"
+                >
+                  Kapat
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <nav 
         className="glass-header h-16 flex items-center shrink-0 border-b border-brand-border/20 content-visibility-auto"
         style={{ 

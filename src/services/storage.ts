@@ -34,6 +34,12 @@ export const storage = {
     localStorage.removeItem(HISTORY_KEY);
   },
 
+  removeHistoryItem: (slug: string) => {
+    const history = storage.getHistory();
+    const newHistory = history.filter(h => h.slug !== slug);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+  },
+
   saveReadingSettings: (settings: ReadingSettings) => {
     localStorage.setItem(READING_SETTINGS_KEY, JSON.stringify(settings));
   },
