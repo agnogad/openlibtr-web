@@ -97,7 +97,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
       </div>
 
       {!session && history.length > 0 && (
-        <div className="mb-10 p-5 rounded-2xl bg-brand-primary/5 border border-brand-primary/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div className="m3-card mb-10 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 w-full">
           <div className="flex-1">
             <h3 className="font-lexend font-bold text-brand-primary mb-1 uppercase tracking-wider text-xs">Hesap Eşitleme</h3>
             <p className="text-[11px] font-lexend text-brand-text-muted leading-relaxed">Geçmişinizi buluta kaydedin ve her yerden erişin.</p>
@@ -124,7 +124,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
           <Link to="/" className="inline-flex items-center px-10 py-4 bg-brand-primary text-brand-bg font-lexend font-bold rounded-2xl shadow-xl shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-all">Göz Atmaya Başla</Link>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden">
           <AnimatePresence mode="popLayout">
             {history.map((item, idx) => (
               <motion.div
@@ -148,7 +148,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                         loading="lazy" 
                       />
                     </div>
-                    <div className="flex-1 min-w-0 pr-10 sm:pr-0">
+                    <div className="flex-1 min-w-0 pr-8 sm:pr-0">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="px-2 py-0.5 rounded bg-brand-primary/10 text-brand-primary text-[9px] font-lexend font-bold uppercase tracking-widest">
                           BÖLÜM {item.chapterId}
@@ -180,10 +180,10 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                       e.stopPropagation();
                       setItemToRemove(item);
                     }}
-                    className="absolute -top-2 -right-2 sm:top-5 sm:right-auto sm:left-[-14px] sm:opacity-0 group-hover:opacity-100 p-2.5 bg-brand-surface border border-brand-border/50 text-brand-text-muted hover:text-red-400 hover:border-red-400/50 shadow-xl rounded-xl transition-all z-10 sm:hover:scale-110 active:scale-90"
+                    className="absolute top-2 right-2 sm:top-5 sm:-left-3 sm:right-auto sm:opacity-0 group-hover:opacity-100 p-2 sm:p-2.5 bg-brand-surface border border-brand-border/50 text-brand-text-muted hover:text-red-400 hover:border-red-400/50 shadow-xl rounded-xl transition-all z-10 sm:hover:scale-110 active:scale-90"
                     title="Geçmişten Kaldır"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </motion.div>
