@@ -11,6 +11,7 @@ import { Novel, NovelConfig, ReadingSettings } from '../types';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
 import { syncService } from '../services/sync';
+import { offlineDB } from '../services/db';
 import { cn } from '../lib/utils';
 import Giscus from '../components/Giscus';
 
@@ -99,26 +100,62 @@ export default function Reader({ session }: { session: Session | null }) {
       setResumePrompt(null);
     }
     
-    Promise.all([
-      api.getNovelConfig(slug),
-      api.getNovel(slug)
-    ]).then(([conf, nav]) => {
-      setConfig(conf);
-      setNovel(nav || null);
-      
-      const targetCh = conf.chapters.find(c => c.id === currentChapterId);
-      if (targetCh) {
-        api.getChapterContent(slug, targetCh.path).then(content => {
-          setChapter(content);
+    const loadContent = async () => {
+      try {
+        const storedNovel = await offlineDB.getNovel(slug);
+        let currentConfig = storedNovel?.config || null;
+        let currentNovel = storedNovel?.novel || null;
+
+        if (storedNovel) {
+          setConfig(storedNovel.config);
+          setNovel(storedNovel.novel);
+        }
+
+        // Try API
+        const [apiConfig, apiNovel] = await Promise.all([
+          api.getNovelConfig(slug).catch(() => null),
+          api.getNovel(slug).catch(() => null)
+        ]);
+
+        if (apiConfig) {
+          setConfig(apiConfig);
+          currentConfig = apiConfig;
+        }
+        if (apiNovel) {
+          setNovel(apiNovel);
+          currentNovel = apiNovel;
+        }
+
+        if (!currentConfig) {
           setLoading(false);
-          if (nav) {
-            document.title = `${nav.title} - Bölüm ${chapterId} | OKUTTUR`;
+          return;
+        }
+
+        const targetCh = currentConfig.chapters.find(c => c.id === currentChapterId);
+        if (targetCh) {
+          // Use stored chapter if available, otherwise fetch
+          if (storedNovel && storedNovel.chapters[targetCh.path]) {
+            setChapter(storedNovel.chapters[targetCh.path]);
+            setLoading(false);
+          } else {
+            const content = await api.getChapterContent(slug, targetCh.path);
+            setChapter(content);
+            setLoading(false);
           }
-        });
-      } else {
+
+          if (currentNovel) {
+            document.title = `${currentNovel.title} - Bölüm ${chapterId} | OKUTTUR`;
+          }
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Reader data load error:", error);
         setLoading(false);
       }
-    });
+    };
+
+    loadContent();
 
     window.scrollTo(0, 0);
   }, [slug, chapterId, session]);

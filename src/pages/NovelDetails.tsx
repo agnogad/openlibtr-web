@@ -31,34 +31,53 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   useEffect(() => {
     if (!slug) return;
     setBookmarked(storage.isBookmarked(slug));
-    setLoading(true); // Reset loading state
-    Promise.all([
-      api.getNovelConfig(slug, true),
-      api.getNovel(slug),
-      offlineDB.getNovel(slug)
-    ]).then(([conf, nav, storedNovel]) => {
-      setConfig(conf);
-      setNovel(nav || null);
-      setIsDownloaded(!!storedNovel);
-      
-      if (storedNovel && conf) {
-        const storedPaths = Object.keys(storedNovel.chapters);
-        const latestPaths = conf.chapters.map(c => c.path);
-        const missing = latestPaths.filter(p => !storedPaths.includes(p));
-        setHasNewChapters(missing.length > 0);
-        setMissingChapters(missing);
-      } else {
-        setHasNewChapters(false);
-        setMissingChapters([]);
-      }
+    setLoading(true);
 
-      if (nav) {
-        document.title = `${nav.title} | OKUTTUR`;
+    const loadData = async () => {
+      try {
+        // Try loading from offline first for instant feedback
+        const storedNovel = await offlineDB.getNovel(slug);
+        if (storedNovel) {
+          setConfig(storedNovel.config);
+          setNovel(storedNovel.novel);
+          setIsDownloaded(true);
+          document.title = `${storedNovel.novel.title} | OKUTTUR`;
+        }
+
+        // Then try loading from API to get updates
+        const [conf, nav] = await Promise.all([
+          api.getNovelConfig(slug, true).catch(() => null),
+          api.getNovel(slug).catch(() => null)
+        ]);
+
+        if (conf) {
+          setConfig(conf);
+        }
+        if (nav) {
+          setNovel(nav);
+          document.title = `${nav.title} | OKUTTUR`;
+        }
+
+        // Re-check update status if we have both config and stored version
+        if (storedNovel && (conf || storedNovel.config)) {
+          const activeConfig = conf || storedNovel.config;
+          const storedPaths = Object.keys(storedNovel.chapters);
+          const latestPaths = activeConfig.chapters.map(c => c.path);
+          const missing = latestPaths.filter(p => !storedPaths.includes(p));
+          setHasNewChapters(missing.length > 0);
+          setMissingChapters(missing);
+        }
+
+      } catch (error) {
+        console.error("Data loading error:", error);
+      } finally {
+        setHistory(storage.getHistory());
+        setResume(storage.getResume());
+        setLoading(false);
       }
-      setHistory(storage.getHistory());
-      setResume(storage.getResume());
-      setLoading(false);
-    });
+    };
+
+    loadData();
   }, [slug]);
 
   const handleDownload = async () => {

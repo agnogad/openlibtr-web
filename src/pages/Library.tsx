@@ -17,21 +17,33 @@ export default function Library({ search, setSearch }: { search: string, setSear
   const pageSize = 20;
 
   useEffect(() => {
-    Promise.all([
-      api.getLibrary(),
-      offlineDB.getAllNovels()
-    ]).then(([data, offlineNovels]) => {
-      setDownloadedSlugs(offlineNovels.map(n => n.slug));
-      
-      // Sort by lastUpdated, newest first
-      const sortedNovels = [...data].sort((a, b) => {
-        const dateA = new Date(a.lastUpdated).getTime();
-        const dateB = new Date(b.lastUpdated).getTime();
-        return dateB - dateA;
-      });
-      setNovels(sortedNovels);
-      setLoading(false);
-    });
+    const loadLibrary = async () => {
+      try {
+        const offlineData = await offlineDB.getAllNovels();
+        setDownloadedSlugs(offlineData.map(n => n.slug));
+
+        try {
+          const data = await api.getLibrary();
+          // Sort by lastUpdated, newest first
+          const sortedNovels = [...data].sort((a, b) => {
+            const dateA = new Date(a.lastUpdated).getTime();
+            const dateB = new Date(b.lastUpdated).getTime();
+            return dateB - dateA;
+          });
+          setNovels(sortedNovels);
+        } catch (apiError) {
+          console.warn("API fetch failed, falling back to offline library", apiError);
+          // Show only downloaded novels if offline
+          setNovels(offlineData.map(d => d.novel));
+        }
+      } catch (error) {
+        console.error("Library load error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLibrary();
     setResume(storage.getResume());
     setBookmarks(storage.getBookmarks());
   }, []);
