@@ -162,88 +162,79 @@ export default function ProfilePage({
           )}
         </div>
 
-        {/* Primary Color Selector */}
-        <div className="m3-card p-8 sm:p-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary">
-              <Settings className="w-6 h-6" />
+        {/* Quick Appearance Settings */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Primary Color Selector */}
+          <div className="m3-card p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-1.5 rounded-lg bg-brand-primary/10 text-brand-primary">
+                <Settings className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-lexend font-bold text-white">Vurgu Rengi</h3>
             </div>
-            <h3 className="text-xl font-lexend font-bold text-white">Vurgu Rengi</h3>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
-            {themes.map((theme) => (
-              <button
-                key={theme.color}
-                onClick={() => {
-                  const newSettings = { ...appearance, primaryColor: theme.color };
-                  setAppearance(newSettings);
-                  storage.saveAppearanceSettings(newSettings);
-                }}
-                className={cn(
-                  "relative flex flex-col items-center gap-4 p-6 rounded-[24px] border-2 transition-all",
-                  appearance.primaryColor === theme.color
-                    ? "border-brand-primary bg-brand-primary/5"
-                    : "border-brand-border/30 bg-brand-surface-variant/10 hover:border-brand-primary/40"
-                )}
-              >
-                <div 
-                  className="w-10 h-10 rounded-full shadow-inner" 
+            
+            <div className="flex flex-wrap gap-3">
+              {themes.map((theme) => (
+                <button
+                  key={theme.color}
+                  onClick={() => {
+                    const newSettings = { ...appearance, primaryColor: theme.color };
+                    setAppearance(newSettings);
+                    storage.saveAppearanceSettings(newSettings);
+                  }}
+                  className={cn(
+                    "relative w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center",
+                    appearance.primaryColor === theme.color
+                      ? "border-brand-primary scale-110 shadow-lg shadow-brand-primary/20"
+                      : "border-transparent hover:scale-105"
+                  )}
                   style={{ backgroundColor: theme.color }}
-                />
-                <span className={cn(
-                  "text-[13px] font-lexend font-medium",
-                  appearance.primaryColor === theme.color ? "text-brand-primary" : "text-brand-text-muted"
-                )}>{theme.name}</span>
-                {appearance.primaryColor === theme.color && (
-                   <motion.div layoutId="activeTheme" className="absolute top-2 right-2 w-2 h-2 bg-brand-primary rounded-full" />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Background Theme Selector */}
-        <div className="m3-card p-8 sm:p-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-2 rounded-xl bg-brand-surface-variant/20 text-brand-text-main">
-              <div className="w-6 h-6 rounded-full border-2 border-current border-t-transparent animate-spin-slow" />
+                  title={theme.name}
+                >
+                  {appearance.primaryColor === theme.color && (
+                    <Check className="w-5 h-5 text-brand-bg mix-blend-difference" />
+                  )}
+                </button>
+              ))}
             </div>
-            <h3 className="text-xl font-lexend font-bold text-white">Arka Plan Teması</h3>
           </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {bgThemes.map((bg) => (
-              <button
-                key={bg.id}
-                onClick={() => {
-                  const newSettings = { ...appearance, theme: bg.id };
-                  setAppearance(newSettings);
-                  storage.saveAppearanceSettings(newSettings);
-                }}
-                className={cn(
-                  "flex items-center gap-4 p-5 rounded-[24px] border-2 transition-all text-left",
-                  appearance.theme === bg.id
-                    ? "border-brand-primary bg-brand-primary/5"
-                    : "border-brand-border/30 bg-brand-surface-variant/10 hover:border-brand-primary/40"
-                )}
-              >
-                <div 
-                  className="w-12 h-12 rounded-2xl shadow-lg border border-white/5" 
-                  style={{ backgroundColor: bg.color }}
-                />
-                <div className="flex-1">
-                  <p className={cn(
-                    "font-lexend font-bold text-sm",
+
+          {/* Background Theme Selector */}
+          <div className="m3-card p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-brand-text-main">
+                <div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin-slow" />
+              </div>
+              <h3 className="text-base font-lexend font-bold text-white">Koyu Tema</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              {bgThemes.map((bg) => (
+                <button
+                  key={bg.id}
+                  onClick={() => {
+                    const newSettings = { ...appearance, theme: bg.id };
+                    setAppearance(newSettings);
+                    storage.saveAppearanceSettings(newSettings);
+                  }}
+                  className={cn(
+                    "flex items-center gap-2.5 p-2 rounded-xl border transition-all text-left",
+                    appearance.theme === bg.id
+                      ? "border-brand-primary bg-brand-primary/5"
+                      : "border-brand-border/30 bg-brand-surface-variant/10 hover:border-brand-primary/40"
+                  )}
+                >
+                  <div 
+                    className="w-6 h-6 rounded-lg shrink-0 border border-white/5" 
+                    style={{ backgroundColor: bg.color }}
+                  />
+                  <span className={cn(
+                    "text-[11px] font-lexend font-bold truncate",
                     appearance.theme === bg.id ? "text-brand-primary" : "text-white"
-                  )}>{bg.name}</p>
-                  <p className="text-[10px] uppercase tracking-wider text-brand-text-muted">Görünüm</p>
-                </div>
-                {appearance.theme === bg.id && (
-                   <Check className="w-5 h-5 text-brand-primary" />
-                )}
-              </button>
-            ))}
+                  )}>{bg.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
