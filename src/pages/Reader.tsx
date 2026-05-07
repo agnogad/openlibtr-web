@@ -146,6 +146,13 @@ export default function Reader({ session }: { session: Session | null }) {
           if (currentNovel) {
             document.title = `${currentNovel.title} - Bölüm ${chapterId} | OKUTTUR`;
           }
+
+          // Preload next chapter
+          const currentIdx = currentConfig.chapters.findIndex(c => c.id === currentChapterId);
+          if (currentIdx !== -1 && currentIdx + 1 < currentConfig.chapters.length) {
+            const nextCh = currentConfig.chapters[currentIdx + 1];
+            api.getChapterContent(slug, nextCh.path).catch(err => console.warn('Preload failed', err));
+          }
         } else {
           setLoading(false);
         }

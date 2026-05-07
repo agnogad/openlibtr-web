@@ -94,9 +94,11 @@ export const api = {
       return offline.chapters[path];
     }
 
-    const response = await fetch(`${BASE_URL}/books/${slug}/${path}`);
-    if (!response.ok) throw new Error('Could not fetch chapter content');
-    return response.text();
+    return fetchWithCache(`chapter-${slug}-${path}`, async () => {
+      const response = await fetch(`${BASE_URL}/books/${slug}/${path}`);
+      if (!response.ok) throw new Error('Could not fetch chapter content');
+      return response.text();
+    });
   },
 
   getCoverUrl: (slug: string): string => {
