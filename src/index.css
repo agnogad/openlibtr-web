@@ -115,3 +115,12 @@
     @apply sticky top-0 z-40 w-full bg-brand-bg/95 backdrop-blur-md border-b border-brand-border/30;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

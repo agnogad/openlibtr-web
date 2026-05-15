@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, LogOut, Settings, Check, Book, Trash2, Download, RefreshCw, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { AppearanceSettings } from '../types';
 import { supabase } from '../lib/supabase';
@@ -133,10 +133,10 @@ export default function ProfilePage({
 
       <div className="space-y-10">
         <div className="m3-card p-10 flex flex-col items-center text-center">
-          <div className="w-24 h-24 rounded-full bg-brand-primary-container flex items-center justify-center mb-6 shadow-md border-4 border-brand-surface">
-            <User className="text-brand-on-primary-container w-12 h-12" />
+          <div className="size-24 rounded-full bg-brand-primary-container flex items-center justify-center mb-6 shadow-md border-4 border-brand-surface">
+            <User className="text-brand-on-primary-container size-12" />
           </div>
-          <h2 className="text-3xl font-lexend font-bold text-white mb-2">{session ? 'Profil Ayarları' : 'Misafir Kullanıcı'}</h2>
+          <h2 className="text-3xl font-lexend font-semibold text-white mb-2">{session ? 'Profil Ayarları' : 'Misafir Kullanıcı'}</h2>
           
           {session ? (
             <>
@@ -145,7 +145,7 @@ export default function ProfilePage({
                 onClick={handleLogout}
                 className="px-10 py-3 rounded-full border border-red-400 text-red-400 font-lexend font-bold text-sm tracking-wide hover:bg-red-400/10 transition-all flex items-center gap-2"
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="size-4" />
                 PROFİLDEN AYRIL
               </button>
             </>
@@ -168,9 +168,9 @@ export default function ProfilePage({
           <div className="m3-card p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-1.5 rounded-lg bg-brand-primary/10 text-brand-primary">
-                <Settings className="w-5 h-5" />
+                <Settings className="size-5" />
               </div>
-              <h3 className="text-base font-lexend font-bold text-white">Vurgu Rengi</h3>
+              <h3 className="text-base font-lexend font-semibold text-white">Vurgu Rengi</h3>
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -183,7 +183,7 @@ export default function ProfilePage({
                     storage.saveAppearanceSettings(newSettings);
                   }}
                   className={cn(
-                    "relative w-10 h-10 rounded-full border-2 transition-all flex items-center justify-center",
+                    "relative size-10 rounded-full border-2 transition-all flex items-center justify-center",
                     appearance.primaryColor === theme.color
                       ? "border-brand-primary scale-110 shadow-lg shadow-brand-primary/20"
                       : "border-transparent hover:scale-105"
@@ -192,7 +192,7 @@ export default function ProfilePage({
                   title={theme.name}
                 >
                   {appearance.primaryColor === theme.color && (
-                    <Check className="w-5 h-5 text-brand-bg mix-blend-difference" />
+                    <Check className="size-5 text-brand-bg mix-blend-difference" />
                   )}
                 </button>
               ))}
@@ -203,9 +203,9 @@ export default function ProfilePage({
           <div className="m3-card p-6">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-brand-text-main">
-                <div className="w-5 h-5 rounded-full border-2 border-current border-t-transparent animate-spin-slow" />
+                <div className="size-5 rounded-full border-2 border-current border-t-transparent animate-spin-slow" />
               </div>
-              <h3 className="text-base font-lexend font-bold text-white">Koyu Tema</h3>
+              <h3 className="text-base font-lexend font-semibold text-white">Koyu Tema</h3>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
@@ -225,7 +225,7 @@ export default function ProfilePage({
                   )}
                 >
                   <div 
-                    className="w-6 h-6 rounded-lg shrink-0 border border-white/5" 
+                    className="size-6 rounded-lg shrink-0 border border-white/5" 
                     style={{ backgroundColor: bg.color }}
                   />
                   <span className={cn(
@@ -244,9 +244,9 @@ export default function ProfilePage({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary">
-              <Download className="w-6 h-6" />
+              <Download className="size-6" />
             </div>
-            <h3 className="text-2xl font-lexend font-bold text-white">İndirilenler</h3>
+            <h3 className="text-2xl font-lexend font-semibold text-white">İndirilenler</h3>
           </div>
           
           <div className="flex items-center gap-3">
@@ -262,9 +262,9 @@ export default function ProfilePage({
                 )}
               >
                 {isUpdatingAll ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="size-4 animate-spin" />
                 ) : (
-                  <RefreshCw className="w-4 h-4" />
+                  <RefreshCw className="size-4" />
                 )}
                 HEPSİNİ GÜNCELLE
               </button>
@@ -277,7 +277,7 @@ export default function ProfilePage({
 
         <AnimatePresence>
           {updateStatus && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -289,7 +289,7 @@ export default function ProfilePage({
                   <span className="text-[10px] font-mono text-brand-primary">{updateStatus.current} / {updateStatus.total}</span>
                 </div>
                 <div className="h-1.5 w-full bg-brand-primary/10 rounded-full overflow-hidden mb-2">
-                  <motion.div 
+                  <m.div 
                     className="h-full bg-brand-primary"
                     initial={{ width: 0 }}
                     animate={{ width: `${(updateStatus.current / updateStatus.total) * 100}%` }}
@@ -297,7 +297,7 @@ export default function ProfilePage({
                 </div>
                 <p className="text-[11px] text-brand-text-muted font-lexend">{updateStatus.message}</p>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
@@ -309,15 +309,15 @@ export default function ProfilePage({
           </div>
         ) : downloadedNovels.length === 0 ? (
           <div className="m3-card p-12 text-center border-dashed">
-            <div className="w-16 h-16 bg-brand-surface-variant/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Download className="w-8 h-8 text-brand-text-muted opacity-30" />
+            <div className="size-16 bg-brand-surface-variant/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Download className="size-8 text-brand-text-muted opacity-30" />
             </div>
             <p className="text-brand-text-muted font-lexend text-sm">Henüz çevrimdışı okumak için bir novel indirmediniz.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {downloadedNovels.map((download) => (
-              <motion.div
+              <m.div
                 key={download.slug}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -331,18 +331,18 @@ export default function ProfilePage({
                       className="w-20 h-28 object-cover rounded-xl shadow-md border border-brand-border/30"
                     />
                     <div className="absolute -top-3 -right-3 bg-brand-primary text-brand-bg rounded-full p-1.5 shadow-lg border-2 border-brand-surface">
-                      <Check className="w-3.5 h-3.5" />
+                      <Check className="size-3.5" />
                     </div>
                   </div>
                   
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <div className="inline-flex items-center gap-1.5 text-[9px] font-lexend font-bold text-green-400 uppercase tracking-widest bg-green-400/10 px-2 py-1 rounded-md w-fit mb-2 border border-green-400/20">
-                       <Download className="w-3 h-3" />
+                       <Download className="size-3" />
                        Çevrimdışı Okunabilir
                     </div>
-                    <h4 className="font-lexend font-bold text-white text-base line-clamp-2 mb-1 leading-snug">{download.novel.title}</h4>
+                    <h4 className="font-lexend font-semibold text-white text-base line-clamp-2 mb-1 leading-snug">{download.novel.title}</h4>
                     <p className="text-[11px] text-brand-text-muted mt-auto flex items-center gap-2">
-                       <Book className="w-3.5 h-3.5" /> {download.config.total_chapters} Bölüm
+                       <Book className="size-3.5" /> {download.config.total_chapters} Bölüm
                     </p>
                   </div>
                 </div>
@@ -359,10 +359,10 @@ export default function ProfilePage({
                     className="p-3 rounded-xl border border-brand-border/30 text-brand-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 transition-all"
                     title="İndirmeyi Klasörden Sil"
                    >
-                     <Trash2 className="w-4 h-4" />
+                     <Trash2 className="size-4" />
                    </button>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         )}

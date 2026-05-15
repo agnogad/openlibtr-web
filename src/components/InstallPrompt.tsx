@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, X, Share } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -56,7 +56,7 @@ export default function InstallPrompt() {
 
   return (
     <AnimatePresence>
-      <motion.div 
+      <m.div 
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
@@ -64,27 +64,27 @@ export default function InstallPrompt() {
       >
         <div className="m3-card p-5 bg-brand-surface shadow-2xl border border-brand-primary/20 relative overflow-hidden">
           {/* Background Glow */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-10 -right-10 size-32 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
           
           <button 
             onClick={closePrompt}
             className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-brand-surface-variant/50 text-brand-text-muted transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="size-4" />
           </button>
 
           <div className="flex gap-4 pr-6">
-            <div className="w-12 h-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center shrink-0 border border-brand-primary/20">
-              <Download className="w-6 h-6 text-brand-primary" />
+            <div className="size-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center shrink-0 border border-brand-primary/20">
+              <Download className="size-6 text-brand-primary" />
             </div>
             
             <div className="flex-1">
-              <h4 className="text-sm font-lexend font-bold text-white mb-1">Uygulamayı Yükle</h4>
+              <h4 className="text-sm font-lexend font-semibold text-white mb-1">Uygulamayı Yükle</h4>
               
               {isIos ? (
                 <p className="text-xs text-brand-text-muted leading-relaxed font-lexend mb-4">
                   Daha iyi bir okuma deneyimi için uygulamayı ana ekranınıza ekleyin. Alt menüden 
-                  <Share className="w-3 h-3 inline mx-1" /> ikonuna dokunup <strong>"Ana Ekrana Ekle"</strong>yi seçin.
+                  <Share className="size-3 inline mx-1" /> ikonuna dokunup <strong>"Ana Ekrana Ekle"</strong>yi seçin.
                 </p>
               ) : (
                 <>
@@ -102,7 +102,7 @@ export default function InstallPrompt() {
             </div>
           </div>
         </div>
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

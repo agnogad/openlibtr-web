@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { History as HistoryIcon, Clock, ChevronRight, Trash2, ArrowLeft } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { HistoryItem } from '../types';
 import { storage } from '../services/storage';
@@ -73,14 +73,14 @@ export default function HistoryPage({ session }: { session: Session | null }) {
 
       <div className="flex items-center justify-between mb-8">
         <Link to="/" className="p-2 -ml-2 rounded-xl hover:bg-brand-surface-variant/20 transition-colors text-brand-text-muted">
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="size-6" />
         </Link>
         {history.length > 0 && (
           <button 
             onClick={() => setIsClearAllModalOpen(true)}
             className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-lexend font-bold text-red-400 hover:bg-red-400/10 transition-all border border-red-400/10 uppercase tracking-widest"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Trash2 className="size-3.5" />
             Temizle
           </button>
         )}
@@ -88,10 +88,10 @@ export default function HistoryPage({ session }: { session: Session | null }) {
 
       <div className="flex items-center gap-5 mb-10">
         <div className="p-4 bg-brand-primary/10 rounded-2xl text-brand-primary shadow-xl shadow-brand-primary/5">
-          <HistoryIcon className="w-8 h-8" />
+          <HistoryIcon className="size-8" />
         </div>
         <div>
-          <h2 className="text-3xl font-lexend font-bold text-white tracking-tight">Geçmiş</h2>
+          <h2 className="text-3xl font-lexend font-semibold text-white tracking-tight">Geçmiş</h2>
           <p className="text-sm font-lexend text-brand-text-muted">En son kaldığınız yerleri keşfedin.</p>
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
       {!session && history.length > 0 && (
         <div className="m3-card mb-10 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 w-full">
           <div className="flex-1">
-            <h3 className="font-lexend font-bold text-brand-primary mb-1 uppercase tracking-wider text-xs">Hesap Eşitleme</h3>
+            <h3 className="font-lexend font-semibold text-brand-primary mb-1 uppercase tracking-wider text-xs">Hesap Eşitleme</h3>
             <p className="text-[11px] font-lexend text-brand-text-muted leading-relaxed">Geçmişinizi buluta kaydedin ve her yerden erişin.</p>
           </div>
           <Link to="/login" className="px-6 py-2.5 bg-brand-primary text-brand-bg text-[11px] font-lexend font-bold rounded-xl whitespace-nowrap hover:brightness-110 active:scale-[0.98] transition-all uppercase tracking-widest shadow-lg shadow-brand-primary/20">
@@ -116,10 +116,10 @@ export default function HistoryPage({ session }: { session: Session | null }) {
         </div>
       ) : history.length === 0 ? (
         <div className="text-center py-32">
-          <div className="w-24 h-24 bg-brand-surface-variant/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-brand-border/10">
-            <HistoryIcon className="w-10 h-10 text-brand-text-muted opacity-30" />
+          <div className="size-24 bg-brand-surface-variant/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-brand-border/10">
+            <HistoryIcon className="size-10 text-brand-text-muted opacity-30" />
           </div>
-          <h3 className="text-2xl font-lexend font-bold text-white mb-2">Listeniz Boş</h3>
+          <h3 className="text-2xl font-lexend font-semibold text-white mb-2">Listeniz Boş</h3>
           <p className="text-brand-text-muted font-lexend mb-10 max-w-xs mx-auto">Henüz bir novel okumaya başlamadınız. Hemen keşfetmeye başlayın!</p>
           <Link to="/" className="inline-flex items-center px-10 py-4 bg-brand-primary text-brand-bg font-lexend font-bold rounded-2xl shadow-xl shadow-brand-primary/20 hover:scale-105 active:scale-95 transition-all">Göz Atmaya Başla</Link>
         </div>
@@ -127,7 +127,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
         <div className="flex flex-col gap-4 w-full max-w-full overflow-hidden">
           <AnimatePresence mode="popLayout">
             {history.map((item, idx) => (
-              <motion.div
+              <m.div
                 key={item.slug}
                 layout
                 initial={{ opacity: 0, x: -20 }}
@@ -144,7 +144,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                       <img 
                         src={api.getCoverUrl(item.slug)} 
                         alt={item.novelTitle} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" 
+                        className="size-full object-cover group-hover:scale-110 transition-transform duration-[1.5s]" 
                         loading="lazy" 
                       />
                     </div>
@@ -153,13 +153,13 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                         <span className="px-2 py-0.5 rounded bg-brand-primary/10 text-brand-primary text-[9px] font-lexend font-bold uppercase tracking-widest">
                           BÖLÜM {item.chapterId}
                         </span>
-                        <div className="w-1 h-1 rounded-full bg-brand-border/40" />
+                        <div className="size-1 rounded-full bg-brand-border/40" />
                         <div className="flex items-center gap-1.5 text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">
-                          <Clock className="w-3 h-3" />
+                          <Clock className="size-3" />
                           {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: tr })}
                         </div>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-lexend font-bold text-white group-hover:text-brand-primary transition-colors line-clamp-1 leading-tight mb-2">
+                      <h3 className="text-lg sm:text-xl font-lexend font-semibold text-white group-hover:text-brand-primary transition-colors line-clamp-1 leading-tight mb-2">
                         {item.novelTitle}
                       </h3>
                       <div className="h-1.5 w-full bg-brand-surface-variant/20 rounded-full overflow-hidden">
@@ -169,8 +169,8 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                         />
                       </div>
                     </div>
-                    <div className="w-10 h-10 rounded-xl bg-brand-surface-variant/10 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-brand-bg transition-all shrink-0 border border-brand-border/10 sm:flex hidden">
-                      <ChevronRight className="w-6 h-6" />
+                    <div className="size-10 rounded-xl bg-brand-surface-variant/10 flex items-center justify-center group-hover:bg-brand-primary group-hover:text-brand-bg transition-all shrink-0 border border-brand-border/10 sm:flex hidden">
+                      <ChevronRight className="size-6" />
                     </div>
                   </Link>
                   
@@ -183,10 +183,10 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                     className="absolute top-2 right-2 sm:top-5 sm:-left-3 sm:right-auto sm:opacity-0 group-hover:opacity-100 p-2 sm:p-2.5 bg-brand-surface border border-brand-border/50 text-brand-text-muted hover:text-red-400 hover:border-red-400/50 shadow-xl rounded-xl transition-all z-10 sm:hover:scale-110 active:scale-90"
                     title="Geçmişten Kaldır"
                   >
-                    <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <Trash2 className="size-3.5 sm:w-4 sm:h-4" />
                   </button>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </AnimatePresence>
         </div>

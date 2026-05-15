@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Book, History as HistoryIcon, Search, Home, User, Menu, Play, Clock } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { AppearanceSettings } from './types';
 import { storage } from './services/storage';
@@ -88,7 +88,7 @@ function BottomNav({ session }: { session: Session | null }) {
               "relative px-5 py-1 rounded-full transition-all duration-300",
               isActive ? "bg-brand-primary/20 text-brand-primary" : "text-brand-text-muted hover:bg-brand-surface-variant/30"
             )}>
-              <item.icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+              <item.icon className="size-5" strokeWidth={isActive ? 2.5 : 2} />
             </div>
             <span className={cn(
               "text-[12px] font-lexend font-medium transition-colors",
@@ -129,25 +129,25 @@ function SideNav({
       <div className={cn("mt-4 mb-8 flex items-center h-10", isCollapsed ? "justify-center" : "px-4 justify-between")}>
         <AnimatePresence mode="wait">
           {!isCollapsed && (
-            <motion.div
+            <m.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               className="flex items-center gap-3 overflow-hidden"
             >
               <Link to="/" className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg shrink-0">
-                  <Book className="w-5 h-5 text-brand-bg" />
+                <div className="size-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg shrink-0">
+                  <Book className="size-5 text-brand-bg" />
                 </div>
                 <span className="text-xl font-lexend font-bold text-white tracking-tight whitespace-nowrap">OKUTTUR</span>
               </Link>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
         
         {isCollapsed && (
-          <Link to="/" className="w-9 h-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg shrink-0">
-            <Book className="w-5 h-5 text-brand-bg" />
+          <Link to="/" className="size-9 bg-brand-primary rounded-[12px] flex items-center justify-center shadow-lg shrink-0">
+            <Book className="size-5 text-brand-bg" />
           </Link>
         )}
 
@@ -159,7 +159,7 @@ function SideNav({
             isCollapsed && "mt-4"
           )}
         >
-          <Menu className="w-5 h-5 text-brand-text-muted" />
+          <Menu className="size-5 text-brand-text-muted" />
         </button>
       </div>
 
@@ -179,20 +179,20 @@ function SideNav({
               )}
             >
                {isCollapsed && isActive && (
-                <motion.div 
+                <m.div 
                   layoutId="activeGlow"
                   className="absolute inset-0 bg-brand-primary/20 rounded-full blur-md"
                 />
               )}
-              <item.icon className="relative z-10 w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+              <item.icon className="relative z-10 size-5" strokeWidth={isActive ? 2.5 : 2} />
               {!isCollapsed && (
-                <motion.span
+                <m.span
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="whitespace-nowrap"
                 >
                   {item.name}
-                </motion.span>
+                </m.span>
               )}
               {isCollapsed && (
                 <div className="absolute left-full ml-4 px-3 py-1.5 bg-brand-surface border border-brand-border/30 rounded-lg text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50">
@@ -206,8 +206,8 @@ function SideNav({
 
       <div className={cn("mt-auto py-6 border-t border-brand-border/20", isCollapsed ? "px-0" : "px-4")}>
         <div className={cn("flex items-center gap-4", isCollapsed ? "justify-center" : "")}>
-          <div className="w-10 h-10 rounded-full bg-brand-surface-variant flex items-center justify-center shrink-0 border border-brand-border/30">
-            <User className="w-5 h-5 text-brand-text-main" />
+          <div className="size-10 rounded-full bg-brand-surface-variant flex items-center justify-center shrink-0 border border-brand-border/30">
+            <User className="size-5 text-brand-text-main" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col min-w-0">
@@ -235,13 +235,13 @@ function Header({ search, setSearch }: { search: string, setSearch: (s: string) 
     <header className="glass-header h-16 md:h-0 sticky md:static flex items-center shrink-0 overflow-hidden px-4 md:px-0">
       <div className="w-full flex items-center justify-between md:hidden py-4">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
-            <Book className="w-4 h-4 text-brand-bg" />
+          <div className="size-8 bg-brand-primary rounded-[8px] flex items-center justify-center">
+            <Book className="size-4 text-brand-bg" />
           </div>
           <span className="text-xl font-lexend font-bold text-white tracking-tighter">OKUTTUR</span>
         </Link>
         <Link to="/profile" className="p-2 rounded-full hover:bg-brand-surface-variant/30 transition-colors">
-          <User className="text-brand-text-main w-6 h-6" />
+          <User className="text-brand-text-main size-6" />
         </Link>
       </div>
     </header>
@@ -331,7 +331,7 @@ export default function App() {
               <AnimatePresence mode="wait">
                 <Suspense fallback={
                   <div className="flex items-center justify-center h-[60vh]">
-                    <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
+                    <div className="size-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin" />
                   </div>
                 }>
                   <Routes>

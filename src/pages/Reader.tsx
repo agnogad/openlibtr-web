@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, ArrowUp, Search, Menu, X, Settings, ChevronLeft, ChevronRight, Book, Clock, AlertCircle 
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { Session } from '@supabase/supabase-js';
@@ -170,7 +170,7 @@ export default function Reader({ session }: { session: Session | null }) {
   if (loading) return (
     <div className="fixed inset-0 flex items-center justify-center bg-brand-bg z-50">
       <div className="flex flex-col items-center gap-6">
-        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
+        <div className="size-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin" />
         <p className="text-brand-text-muted font-lexend font-medium text-sm animate-pulse">Bölüm Hazırlanıyor...</p>
       </div>
     </div>
@@ -211,7 +211,7 @@ export default function Reader({ session }: { session: Session | null }) {
       {/* Resume Jump Prompt */}
       <AnimatePresence>
         {resumePrompt && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
@@ -220,10 +220,10 @@ export default function Reader({ session }: { session: Session | null }) {
             <div className="bg-brand-surface border border-brand-primary/30 p-4 rounded-2xl shadow-2xl shadow-brand-primary/10">
               <div className="flex items-start gap-3 mb-4">
                 <div className="p-2 rounded-xl bg-brand-primary/10 text-brand-primary shrink-0">
-                  <AlertCircle className="w-5 h-5" />
+                  <AlertCircle className="size-5" />
                 </div>
                 <div>
-                  <h4 className="text-[13px] font-lexend font-bold text-white mb-1 uppercase tracking-wide">Okuma Konumu</h4>
+                  <h4 className="text-[13px] font-lexend font-semibold text-white mb-1 uppercase tracking-wide">Okuma Konumu</h4>
                   <p className="text-[11px] text-brand-text-muted leading-relaxed font-medium">
                     Kaldığınız yer <span className="text-brand-primary font-bold">Bölüm {resumePrompt.chapterId}</span>. 
                     {parseInt(chapterId!) < resumePrompt.chapterId ? ' Ama şu an eski bir bölümdesiniz.' : ' Ama şu an daha ilerideki/farklı bir bölümdesiniz.'}
@@ -245,7 +245,7 @@ export default function Reader({ session }: { session: Session | null }) {
                 </button>
               </div>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
@@ -259,13 +259,13 @@ export default function Reader({ session }: { session: Session | null }) {
         <div className="container mx-auto px-2 sm:px-4 flex items-center justify-between gap-2">
           <Link 
             to={`/novel/${slug}`}
-            className="flex items-center justify-center w-10 h-10 shrink-0 rounded-full hover:bg-brand-surface-variant/30 transition-all"
+            className="flex items-center justify-center size-10 shrink-0 rounded-full hover:bg-brand-surface-variant/30 transition-all"
           >
-            <ArrowLeft className="w-6 h-6" style={{ color: readerSettings.textColor }} />
+            <ArrowLeft className="size-6" style={{ color: readerSettings.textColor }} />
           </Link>
           
           <div className="flex-1 min-w-0 px-2 text-center">
-            <h2 className="text-xs sm:text-sm font-lexend font-bold truncate max-w-[180px] sm:max-w-none mx-auto" style={{ color: readerSettings.textColor }}>{novel.title}</h2>
+            <h2 className="text-xs sm:text-sm font-lexend font-semibold truncate max-w-[180px] sm:max-w-none mx-auto" style={{ color: readerSettings.textColor }}>{novel.title}</h2>
             <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest leading-none mt-1" style={{ color: readerSettings.textColor, opacity: 0.8 }}>BÖLÜM {chapterId}</p>
           </div>
 
@@ -278,7 +278,7 @@ export default function Reader({ session }: { session: Session | null }) {
               )}
               style={!showChapters ? { color: readerSettings.textColor } : {}}
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="size-6" />
             </button>
             <button 
               onClick={() => setShowSettings(!showSettings)}
@@ -288,14 +288,14 @@ export default function Reader({ session }: { session: Session | null }) {
               )}
               style={!showSettings ? { color: readerSettings.textColor } : {}}
             >
-              <Settings className="w-6 h-6" />
+              <Settings className="size-6" />
             </button>
           </div>
         </div>
 
         <AnimatePresence>
           {showChapters && (
-            <motion.div 
+            <m.div 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -304,7 +304,7 @@ export default function Reader({ session }: { session: Session | null }) {
               <div className="container mx-auto p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                   <div className="flex items-center gap-3">
-                    <h3 className="text-sm font-lexend font-bold text-white uppercase tracking-wider">Hızlı Erişim</h3>
+                    <h3 className="text-sm font-lexend font-semibold text-white uppercase tracking-wider">Hızlı Erişim</h3>
                     <span className="text-[10px] bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full font-bold">
                       {filteredQuickChapters.length} BÖLÜM
                     </span>
@@ -312,7 +312,7 @@ export default function Reader({ session }: { session: Session | null }) {
 
                   <div className="flex items-center gap-2">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-brand-text-muted" />
                       <input 
                         type="text"
                         placeholder="Bölüm Ara..."
@@ -325,10 +325,10 @@ export default function Reader({ session }: { session: Session | null }) {
                       />
                     </div>
                     <button onClick={() => setShowChapters(false)} className="p-2 rounded-full hover:bg-brand-surface-variant/30 hidden sm:block">
-                      <X className="w-5 h-5 text-brand-text-muted" />
+                      <X className="size-5 text-brand-text-muted" />
                     </button>
                     <button onClick={() => setShowChapters(false)} className="sm:hidden p-2 text-brand-text-muted">
-                      <X className="w-5 h-5" />
+                      <X className="size-5" />
                     </button>
                   </div>
                 </div>
@@ -367,7 +367,7 @@ export default function Reader({ session }: { session: Session | null }) {
                       onClick={() => setChapterPage(p => p - 1)}
                       className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 hover:text-brand-primary transition-all"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="size-5" />
                     </button>
                     <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">
                       SAYFA {chapterPage} / {quickTotalPages}
@@ -377,16 +377,16 @@ export default function Reader({ session }: { session: Session | null }) {
                       onClick={() => setChapterPage(p => p + 1)}
                       className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 hover:text-brand-primary transition-all"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <ChevronRight className="size-5" />
                     </button>
                   </div>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           )}
 
           {showSettings && (
-            <motion.div 
+            <m.div 
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -395,7 +395,7 @@ export default function Reader({ session }: { session: Session | null }) {
               <div className="container mx-auto max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
-                    <label className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider">Metin Boyutu</label>
+                    <span className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider">Metin Boyutu</span>
                     <span className="text-brand-primary font-bold text-sm">{readerSettings.fontSize}px</span>
                   </div>
                   <input 
@@ -413,7 +413,7 @@ export default function Reader({ session }: { session: Session | null }) {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider mb-4 block">Metin Fontu</label>
+                  <span className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider mb-4 block">Metin Fontu</span>
                   <div className="grid grid-cols-2 gap-2">
                     {(['Lexend', 'Inter', 'Serif', 'Mono'] as const).map((font) => (
                       <button
@@ -437,7 +437,7 @@ export default function Reader({ session }: { session: Session | null }) {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider block">Renk Temaları</label>
+                  <span className="text-xs font-lexend font-bold text-brand-text-muted uppercase tracking-wider block">Renk Temaları</span>
                   <div className="flex flex-wrap gap-2">
                     {[
                       { name: 'Karanlık', bg: '#1c1b1f', text: '#e1e1e1' },
@@ -468,7 +468,7 @@ export default function Reader({ session }: { session: Session | null }) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest block">Arka Plan</label>
+                    <span className="text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest block">Arka Plan</span>
                     <div className="flex items-center gap-2">
                       <input 
                         type="color" 
@@ -478,13 +478,13 @@ export default function Reader({ session }: { session: Session | null }) {
                           setReaderSettings(newSettings);
                           storage.saveReadingSettings(newSettings);
                         }}
-                        className="w-10 h-10 rounded-lg overflow-hidden bg-transparent border-none cursor-pointer p-0"
+                        className="size-10 rounded-lg overflow-hidden bg-transparent border-none cursor-pointer p-0"
                       />
                       <span className="text-[10px] font-mono text-brand-text-muted uppercase">{readerSettings.backgroundColor || '#000000'}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest block">Yazı Rengi</label>
+                    <span className="text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest block">Yazı Rengi</span>
                     <div className="flex items-center gap-2">
                       <input 
                         type="color" 
@@ -494,14 +494,14 @@ export default function Reader({ session }: { session: Session | null }) {
                           setReaderSettings(newSettings);
                           storage.saveReadingSettings(newSettings);
                         }}
-                        className="w-10 h-10 rounded-lg overflow-hidden bg-transparent border-none cursor-pointer p-0"
+                        className="size-10 rounded-lg overflow-hidden bg-transparent border-none cursor-pointer p-0"
                       />
                       <span className="text-[10px] font-mono text-brand-text-muted uppercase">{readerSettings.textColor || '#ffffff'}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
       </nav>
@@ -514,14 +514,14 @@ export default function Reader({ session }: { session: Session | null }) {
               className="flex items-center gap-1.5 text-xs font-lexend font-bold uppercase tracking-widest"
               style={{ color: readerSettings.textColor, opacity: 0.6 }}
             >
-              <Clock className="w-3.5 h-3.5 text-brand-primary" />
+              <Clock className="size-3.5 text-brand-primary" />
               {time} Dakika Okuma
             </div>
             <div 
               className="hidden sm:flex items-center gap-1.5 text-xs font-lexend font-bold uppercase tracking-widest"
               style={{ color: readerSettings.textColor, opacity: 0.6 }}
             >
-              <Book className="w-3.5 h-3.5 text-brand-primary" />
+              <Book className="size-3.5 text-brand-primary" />
               {words} Kelime
             </div>
           </div>
@@ -555,7 +555,7 @@ export default function Reader({ session }: { session: Session | null }) {
               to={`/read/${slug}/${prevCh.id}`}
               className="flex items-center gap-3 px-8 py-4 bg-brand-surface-variant/20 rounded-2xl text-white font-lexend font-bold text-sm tracking-wide hover:bg-brand-surface-variant/40 transition-all w-full sm:w-auto"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="size-5" />
               Önceki Bölüm
             </Link>
           ) : <div className="hidden sm:block" />}
@@ -566,7 +566,7 @@ export default function Reader({ session }: { session: Session | null }) {
               className="flex items-center gap-3 px-8 py-4 bg-brand-primary text-brand-bg rounded-2xl font-lexend font-bold text-sm tracking-wide hover:brightness-110 transition-all w-full sm:w-auto shadow-lg"
             >
               Sonraki Bölüm
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="size-5" />
             </Link>
           ) : <div className="hidden sm:block" />}
         </div>
@@ -586,15 +586,15 @@ export default function Reader({ session }: { session: Session | null }) {
       {/* Back to Top */}
       <AnimatePresence>
         {showBackToTop && (
-          <motion.button
+          <m.button
             initial={{ opacity: 0, scale: 0.5, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.5, y: 20 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-24 right-6 sm:bottom-10 sm:right-10 w-12 h-12 bg-brand-primary text-brand-bg rounded-full shadow-2xl flex items-center justify-center z-40 hover:brightness-110 active:scale-90 transition-all border-4 border-brand-bg"
+            className="fixed bottom-24 right-6 sm:bottom-10 sm:right-10 size-12 bg-brand-primary text-brand-bg rounded-full shadow-2xl flex items-center justify-center z-40 hover:brightness-110 active:scale-90 transition-all border-4 border-brand-bg"
           >
-            <ArrowUp className="w-6 h-6" />
-          </motion.button>
+            <ArrowUp className="size-6" />
+          </m.button>
         )}
       </AnimatePresence>
     </div>

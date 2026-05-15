@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import {  m  } from 'motion/react';
 import { supabase } from '../lib/supabase';
 
 export default function AuthPage() {
@@ -31,13 +31,13 @@ export default function AuthPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4">
-      <motion.div 
+      <m.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md m3-card p-8 sm:p-12"
       >
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-lexend font-bold text-white mb-2">
+          <h2 className="text-3xl font-lexend font-semibold text-white mb-2">
             {isSignUp ? 'Aramıza Katıl' : 'Hoş Geldiniz'}
           </h2>
           <p className="text-brand-text-muted text-sm font-lexend">
@@ -52,7 +52,7 @@ export default function AuthPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-brand-surface-variant/20 border-b-2 border-brand-border/30 rounded-t-[12px] px-4 py-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-all placeholder:text-brand-text-muted/50"
+              className="w-full bg-brand-surface-variant/20 border-b-2 border-brand-border/30 rounded-t-[12px] p-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-all placeholder:text-brand-text-muted/50"
               placeholder="E-posta Adresi"
             />
           </div>
@@ -62,7 +62,7 @@ export default function AuthPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-brand-surface-variant/20 border-b-2 border-brand-border/30 rounded-t-[12px] px-4 py-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-all placeholder:text-brand-text-muted/50"
+              className="w-full bg-brand-surface-variant/20 border-b-2 border-brand-border/30 rounded-t-[12px] p-4 text-sm text-white focus:outline-none focus:border-brand-primary transition-all placeholder:text-brand-text-muted/50"
               placeholder="Şifre"
             />
           </div>
@@ -90,7 +90,7 @@ export default function AuthPage() {
             {isSignUp ? 'Hesabınız var mı? Giriş Yapın' : 'Henüz üye değil misiniz? Kayıt Olun'}
           </button>
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }

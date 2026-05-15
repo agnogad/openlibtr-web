@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Play, ChevronLeft, ChevronRight, Book, Download } from 'lucide-react';
-import { motion } from 'motion/react';
+import {  m  } from 'motion/react';
 import { Novel, ResumeData } from '../types';
 import { api } from '../services/api';
 import { storage } from '../services/storage';
@@ -25,7 +25,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
         try {
           const data = await api.getLibrary();
           // Sort by lastUpdated, newest first
-          const sortedNovels = [...data].sort((a, b) => {
+          const sortedNovels = data.toSorted((a, b) => {
             const dateA = new Date(a.lastUpdated).getTime();
             const dateB = new Date(b.lastUpdated).getTime();
             return dateB - dateA;
@@ -63,38 +63,38 @@ export default function Library({ search, setSearch }: { search: string, setSear
     <div className="flex flex-col gap-10">
       {/* Hero / Resume Section */}
       {resume ? (
-        <motion.div 
+        <m.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <div className="m3-card p-6 flex flex-col md:flex-row items-center gap-8 bg-brand-primary-container/10">
             <div className="relative w-28 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0 border border-brand-border/20">
-              <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="w-full h-full object-cover" fetchPriority="high" decoding="async" />
+              <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="size-full object-cover" fetchPriority="high" decoding="async" />
             </div>
             
             <div className="flex-1 text-center md:text-left">
               <span className="text-[10px] font-lexend font-bold text-brand-primary uppercase tracking-widest mb-2 block">OKUMAYA DEVAM ET</span>
-              <h3 className="text-xl sm:text-2xl font-lexend font-bold text-white mb-1 line-clamp-1 sm:line-clamp-2">{resume.novelTitle}</h3>
+              <h3 className="text-xl sm:text-2xl font-lexend font-semibold text-white mb-1 line-clamp-1 sm:line-clamp-2">{resume.novelTitle}</h3>
               <p className="text-sm text-brand-text-muted mb-6">Mevcut Bölüm: {resume.chapterId}</p>
               
               <Link 
                 to={`/read/${resume.slug}/${resume.chapterId}`}
                 className="inline-flex items-center gap-3 px-8 py-3 bg-brand-primary text-brand-bg font-lexend font-bold rounded-full shadow-lg hover:brightness-110 active:scale-95 transition-all"
               >
-                <Play className="w-4 h-4 fill-current" />
+                <Play className="size-4 fill-current" />
                 Dönüş Yap
               </Link>
             </div>
           </div>
-        </motion.div>
+        </m.div>
       ) : (
-        <motion.div 
+        <m.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative m3-card p-8 sm:p-12 overflow-hidden bg-brand-surface border border-brand-primary/20 flex flex-col md:flex-row items-center gap-8 justify-between"
         >
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -top-40 -right-40 size-96 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-40 -left-40 size-96 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="relative z-10 flex-1 text-center md:text-left">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-lexend font-extrabold text-white mb-4 tracking-tight leading-tight">
@@ -118,23 +118,23 @@ export default function Library({ search, setSearch }: { search: string, setSear
           </div>
           
           <div className="relative z-10 hidden md:block shrink-0">
-             <div className="w-48 h-48 bg-brand-primary/10 rounded-full flex items-center justify-center border-4 border-brand-primary/30 shadow-2xl relative">
-                <Book className="w-20 h-20 text-brand-primary absolute transform -rotate-12" />
+             <div className="size-48 bg-brand-primary/10 rounded-full flex items-center justify-center border-4 border-brand-primary/30 shadow-2xl relative">
+                <Book className="size-20 text-brand-primary absolute transform -rotate-12" />
              </div>
           </div>
-        </motion.div>
+        </m.div>
       )}
 
       {/* Favoriler Horizontal List */}
       {bookmarks.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-lexend font-bold text-white">Favorileriniz</h2>
+            <h2 className="text-2xl font-lexend font-semibold text-white">Favorileriniz</h2>
             <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{bookmarks.length} NOVEL</span>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar snap-x">
             {bookmarks.map((bookmark, idx) => (
-              <motion.div
+              <m.div
                 key={bookmark.slug}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -149,15 +149,15 @@ export default function Library({ search, setSearch }: { search: string, setSear
                     <img 
                       src={api.getCoverUrl(bookmark.slug)} 
                       alt={bookmark.title} 
-                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-out" 
+                      className="size-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-out" 
                       loading="lazy"
                     />
                   </div>
-                  <h3 className="font-lexend font-bold text-sm line-clamp-2 text-white group-hover:text-brand-primary transition-colors leading-tight px-1">
+                  <h3 className="font-lexend font-semibold text-sm line-clamp-2 text-white group-hover:text-brand-primary transition-colors leading-tight px-1">
                     {bookmark.title}
                   </h3>
                 </Link>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -166,14 +166,14 @@ export default function Library({ search, setSearch }: { search: string, setSear
       {/* Son Güncellemeler Grid */}
       <div>
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-lexend font-bold text-white">Son Güncellemeler</h2>
+          <h2 className="text-2xl font-lexend font-semibold text-white">Son Güncellemeler</h2>
           <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{novels.length} TOPLAM</span>
         </div>
 
         {/* Search Bar - Repositioned for all screen sizes */}
         <div className="mb-10 max-w-2xl">
           <div className="relative group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-text-muted w-5 h-5 group-focus-within:text-brand-primary transition-colors" />
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-text-muted size-5 group-focus-within:text-brand-primary transition-colors" />
             <input 
               id="search-input"
               type="text"
@@ -196,8 +196,8 @@ export default function Library({ search, setSearch }: { search: string, setSear
           </div>
         ) : filteredNovels.length === 0 ? (
           <div className="py-32 text-center">
-            <Search className="w-16 h-16 text-brand-text-muted mx-auto mb-6 opacity-20" />
-            <h3 className="text-xl font-lexend font-bold text-white mb-2">Sonuç Bulunamadı</h3>
+            <Search className="size-16 text-brand-text-muted mx-auto mb-6 opacity-20" />
+            <h3 className="text-xl font-lexend font-semibold text-white mb-2">Sonuç Bulunamadı</h3>
             <p className="text-brand-text-muted font-lexend text-sm max-w-xs mx-auto">
               "{search}" ile eşleşen bir novel bulamadık. Başka bir anahtar kelime deneyebilirsiniz.
             </p>
@@ -212,7 +212,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8 content-visibility-auto">
             {paginatedNovels.map((novel, idx) => (
-              <motion.div
+              <m.div
                 key={novel.slug}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -226,7 +226,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
                     <img 
                       src={api.getCoverUrl(novel.slug)} 
                       alt={novel.title} 
-                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out" 
+                      className="size-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out" 
                       loading="lazy"
                       decoding="async"
                     />
@@ -235,14 +235,14 @@ export default function Library({ search, setSearch }: { search: string, setSear
                       <span className="px-6 py-2.5 bg-brand-primary text-brand-bg text-[12px] font-black rounded-full shadow-xl">OKUMAYA BAŞLA</span>
                     </div>
                   </div>
-                  <h3 className="font-lexend font-bold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
+                  <h3 className="font-lexend font-semibold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
                     {novel.title}
                   </h3>
                   <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide flex items-center gap-2">
                     <span className="flex items-center gap-1">
                       {novel.chapterCount} Bölüm
                       {downloadedSlugs.includes(novel.slug) && (
-                        <Download className="w-2.5 h-2.5 text-green-400" />
+                        <Download className="size-2.5 text-green-400" />
                       )}
                     </span>
                     {(() => {
@@ -259,7 +259,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
                     })()}
                   </p>
                 </Link>
-              </motion.div>
+              </m.div>
             ))}
           </div>
 
@@ -273,7 +273,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
                 }}
                 className="p-3 rounded-2xl bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 transition-all"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="size-6" />
               </button>
               <span className="text-sm font-lexend font-bold text-brand-text-muted uppercase tracking-widest leading-none">SAYFA {page} / {totalPages}</span>
               <button 
@@ -284,7 +284,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
                 }}
                 className="p-3 rounded-2xl bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 transition-all"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="size-6" />
               </button>
             </div>
           )}

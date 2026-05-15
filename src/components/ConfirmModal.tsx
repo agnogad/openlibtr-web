@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 import { AlertTriangle, X } from 'lucide-react';
 
 interface ConfirmModalProps {
@@ -27,19 +27,19 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     switch (variant) {
       case 'warning':
         return {
-          icon: <AlertTriangle className="w-6 h-6 text-yellow-400" />,
+          icon: <AlertTriangle className="size-6 text-yellow-400" />,
           button: 'bg-yellow-500 hover:bg-yellow-600 text-black',
           bg: 'bg-yellow-500/10 border-yellow-500/20'
         };
       case 'info':
         return {
-          icon: <AlertTriangle className="w-6 h-6 text-blue-400" />,
+          icon: <AlertTriangle className="size-6 text-blue-400" />,
           button: 'bg-blue-500 hover:bg-blue-600 text-white',
           bg: 'bg-blue-500/10 border-blue-500/20'
         };
       default: // danger
         return {
-          icon: <AlertTriangle className="w-6 h-6 text-red-400" />,
+          icon: <AlertTriangle className="size-6 text-red-400" />,
           button: 'bg-red-500 hover:bg-red-600 text-white',
           bg: 'bg-red-500/10 border-red-500/20'
         };
@@ -52,7 +52,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -60,7 +60,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
           />
           <div className="fixed inset-0 flex items-center justify-center p-4 z-[101] pointer-events-none">
-            <motion.div
+            <m.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -75,11 +75,11 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                     onClick={onClose}
                     className="p-2 hover:bg-brand-surface-variant/20 rounded-xl transition-colors"
                   >
-                    <X className="w-5 h-5 text-brand-text-muted" />
+                    <X className="size-5 text-brand-text-muted" />
                   </button>
                 </div>
                 
-                <h3 className="text-xl font-lexend font-bold text-white mb-2">{title}</h3>
+                <h3 className="text-xl font-lexend font-semibold text-white mb-2">{title}</h3>
                 <p className="text-brand-text-muted text-sm leading-relaxed mb-8">
                   {message}
                 </p>
@@ -102,7 +102,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           </div>
         </>
       )}

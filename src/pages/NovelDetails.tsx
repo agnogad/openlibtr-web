@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Search, Play, Book, Check, Clock, ChevronLeft, ChevronRight, Download, Trash2, Loader2, Heart, HeartOff } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import {  m, AnimatePresence  } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { Novel, NovelConfig, HistoryItem, ResumeData } from '../types';
 import { api } from '../services/api';
@@ -233,12 +233,12 @@ export default function NovelDetails({ session }: { session: Session | null }) {
       {/* Novel Header Info */}
       <div className="w-full xl:w-80 shrink-0">
         <div className="xl:sticky xl:top-10 space-y-8">
-          <motion.div 
+          <m.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="aspect-[2/3] rounded-[32px] overflow-hidden shadow-2xl border border-brand-border/10 group relative"
           >
-            <img src={api.getCoverUrl(config.slug)} alt={novel.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[2s]" fetchPriority="high" decoding="async" />
+            <img src={api.getCoverUrl(config.slug)} alt={novel.title} className="size-full object-cover group-hover:scale-110 transition-transform duration-[2s]" fetchPriority="high" decoding="async" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
             
             <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between">
@@ -251,11 +251,11 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                   <span className="text-white text-xs font-lexend font-bold uppercase tracking-widest">4.8 / 5</span>
                </div>
             </div>
-          </motion.div>
+          </m.div>
           
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-3xl sm:text-4xl font-lexend font-bold text-white leading-tight tracking-tight break-words">{novel.title}</h1>
+              <h1 className="text-3xl sm:text-4xl font-lexend font-semibold text-white leading-tight tracking-tight break-words">{novel.title}</h1>
               
               <div className="flex flex-wrap gap-2.5">
                 <div className="px-4 py-1.5 rounded-xl bg-brand-primary/10 text-brand-primary text-[10px] font-lexend font-bold uppercase tracking-widest border border-brand-primary/20">
@@ -273,7 +273,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                       : "bg-surface-variant/10 text-brand-text-muted border-brand-border/20 hover:border-brand-text-muted/30"
                   )}
                 >
-                  <Heart className={cn("w-3 h-3", bookmarked && "fill-current")} />
+                  <Heart className={cn("size-3", bookmarked && "fill-current")} />
                   {bookmarked ? "Favorilerde" : "Favoriye Ekle"}
                 </button>
               </div>
@@ -285,7 +285,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                   to={`/read/${config.slug}/${currentResume.chapterId}`}
                   className="group flex items-center justify-center gap-4 w-full py-5 bg-brand-primary text-brand-bg font-lexend font-bold text-sm tracking-wide rounded-2xl shadow-xl shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all"
                 >
-                  <Play className="w-5 h-5 fill-current group-hover:scale-110 transition-transform" />
+                  <Play className="size-5 fill-current group-hover:scale-110 transition-transform" />
                   Devam Et (B{currentResume.chapterId})
                 </Link>
               ) : (
@@ -293,7 +293,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                   to={`/read/${config.slug}/1`}
                   className="group flex items-center justify-center gap-4 w-full py-5 bg-brand-primary text-brand-bg font-lexend font-bold text-sm tracking-wide rounded-2xl shadow-xl shadow-brand-primary/20 hover:brightness-110 active:scale-[0.98] transition-all"
                 >
-                  <Book className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <Book className="size-5 group-hover:scale-110 transition-transform" />
                   Okumaya Başla
                 </Link>
               )}
@@ -317,7 +317,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                           style={{ width: `${(downloadProgress.current / downloadProgress.total) * 100}%` }}
                         />
                         <div className="relative flex items-center justify-center gap-3 w-full z-10 py-0.5">
-                          <Loader2 className="w-5 h-5 animate-spin text-brand-primary" />
+                          <Loader2 className="size-5 animate-spin text-brand-primary" />
                           <div className="flex flex-col items-start translate-y-[1px]">
                             <span className="text-[10px] font-lexend font-bold text-white tracking-widest uppercase mb-0.5">
                               Arşivleniyor
@@ -330,8 +330,8 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                       </>
                     ) : (
                       <>
-                        <div className="w-10 h-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:bg-brand-primary group-hover:text-brand-bg transition-all duration-300">
-                           <Download className="w-5 h-5" />
+                        <div className="size-10 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary group-hover:bg-brand-primary group-hover:text-brand-bg transition-all duration-300">
+                           <Download className="size-5" />
                         </div>
                         <div className="flex flex-col items-start text-left">
                           <span className="text-xs font-lexend font-bold text-white tracking-wide">
@@ -359,14 +359,14 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                       >
                         {downloading ? (
                           <div className="flex items-center gap-2">
-                             <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
+                             <Loader2 className="size-4 animate-spin text-brand-primary" />
                              <span className="text-[11px] font-lexend font-bold text-brand-primary tracking-widest uppercase">
                                 GÜNCEL ({downloadProgress.current}/{downloadProgress.total})
                              </span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                             <Download className="w-4 h-4 text-brand-primary" />
+                             <Download className="size-4 text-brand-primary" />
                              <span className="text-[11px] font-lexend font-bold text-brand-primary tracking-widest uppercase">
                                 YENİ {missingChapters.length} BÖLÜM
                              </span>
@@ -377,7 +377,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                     <div className="flex gap-3">
                       <div className="flex-1 flex flex-col justify-center px-5 py-3 rounded-2xl bg-green-500/5 border border-green-500/20">
                         <div className="flex items-center gap-2 mb-0.5">
-                           <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                           <div className="size-1.5 rounded-full bg-green-400 animate-pulse" />
                            <span className="text-[10px] font-lexend font-bold text-green-400 tracking-widest uppercase">Hazır</span>
                         </div>
                         <span className="text-[9px] text-brand-text-muted font-bold uppercase tracking-wider">
@@ -386,10 +386,10 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                       </div>
                       <button
                         onClick={() => setIsDeleteModalOpen(true)}
-                        className="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-500/5 border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/5"
+                        className="flex items-center justify-center size-14 rounded-2xl bg-red-500/5 border border-red-500/20 text-red-400 hover:bg-red-500/10 hover:border-red-500/40 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-red-500/5"
                         title="İndirmeyi Sil"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="size-5" />
                       </button>
                     </div>
                   </div>
@@ -407,14 +407,14 @@ export default function NovelDetails({ session }: { session: Session | null }) {
             <div>
                <div className="flex items-center gap-3 mb-2">
                   <div className="w-1.5 h-6 bg-brand-primary rounded-full shadow-lg shadow-brand-primary/20" />
-                  <h2 className="text-3xl font-lexend font-bold text-white tracking-tight">Bölümler</h2>
+                  <h2 className="text-3xl font-lexend font-semibold text-white tracking-tight">Bölümler</h2>
                </div>
                <p className="text-xs font-lexend text-brand-text-muted uppercase tracking-widest font-bold opacity-60">Toplam {filteredChapters.length} Kayıt</p>
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
               <div className="relative w-full sm:w-64 group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-text-muted group-focus-within:text-brand-primary transition-colors" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-brand-text-muted group-focus-within:text-brand-primary transition-colors" />
                 <input 
                   type="text"
                   placeholder="Başlık veya No..."
@@ -457,7 +457,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                 const isCurrent = currentResume?.chapterId === ch.id;
                 
                 return (
-                  <motion.div
+                  <m.div
                     key={ch.id}
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -477,7 +477,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                     >
                       <div className="flex items-center gap-4 min-w-0 z-10">
                         <div className={cn(
-                          "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-xs font-black transition-all duration-300",
+                          "size-11 rounded-2xl flex items-center justify-center shrink-0 text-xs font-black transition-all duration-300",
                           isCurrent 
                             ? "bg-brand-primary text-brand-bg rotate-12" 
                             : isRead 
@@ -501,12 +501,12 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                       
                       <div className="shrink-0 z-10 transition-transform group-hover:translate-x-1 duration-300">
                         {isRead ? (
-                           <div className="w-6 h-6 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                             <Check className="w-3.5 h-3.5 text-green-400" />
+                           <div className="size-6 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                             <Check className="size-3.5 text-green-400" />
                            </div>
                         ) : (
                            <ChevronRight className={cn(
-                             "w-5 h-5 transition-colors",
+                             "size-5 transition-colors",
                              isCurrent ? "text-brand-primary" : "text-brand-text-muted group-hover:text-brand-primary"
                            )} />
                         )}
@@ -514,7 +514,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
 
                       {/* Animated Background Indicator for Current Chapter */}
                       {isCurrent && (
-                        <motion.div 
+                        <m.div 
                           layoutId="activeChapterGlow"
                           className="absolute inset-0 bg-brand-primary/5 pointer-events-none"
                           initial={{ opacity: 0 }}
@@ -522,7 +522,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                         />
                       )}
                     </Link>
-                  </motion.div>
+                  </m.div>
                 );
               })}
             </AnimatePresence>
@@ -535,7 +535,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                 onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className="p-4 rounded-2xl bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 hover:text-brand-primary transition-all active:scale-90 border border-brand-border/20 shadow-lg"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="size-6" />
               </button>
               
               <div className="flex flex-col items-center gap-1">
@@ -548,7 +548,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                 onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                 className="p-4 rounded-2xl bg-brand-surface-variant/20 text-white disabled:opacity-20 hover:bg-brand-primary/20 hover:text-brand-primary transition-all active:scale-90 border border-brand-border/20 shadow-lg"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="size-6" />
               </button>
             </div>
           )}
