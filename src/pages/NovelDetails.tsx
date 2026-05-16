@@ -26,7 +26,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
   const [downloadProgress, setDownloadProgress] = useState({ current: 0, total: 0 });
   const [bookmarked, setBookmarked] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const pageSize = 48;
+  const pageSize = 100;
 
   useEffect(() => {
     if (!slug) return;
@@ -450,7 +450,7 @@ export default function NovelDetails({ session }: { session: Session | null }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
              <AnimatePresence mode="popLayout">
               {paginatedChapters.map((ch, idx) => {
                 const isRead = readChapters.has(ch.id);
@@ -462,12 +462,13 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                     layout
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: (idx % pageSize) * 0.01 }}
+                    transition={{ delay: (idx % pageSize) * 0.005 }}
                   >
                     <Link
                       to={`/read/${slug}/${ch.id}`}
+                      title={ch.title || `Bölüm ${ch.id}`}
                       className={cn(
-                        "relative flex items-center justify-between p-4 rounded-2xl border transition-all group overflow-hidden h-full",
+                        "relative flex flex-col items-center justify-center aspect-square p-2 rounded-2xl border transition-all group overflow-hidden",
                         isCurrent 
                           ? "bg-brand-primary/10 border-brand-primary/50 ring-2 ring-brand-primary/20" 
                           : isRead 
@@ -475,48 +476,28 @@ export default function NovelDetails({ session }: { session: Session | null }) {
                             : "bg-brand-surface-variant/20 border-brand-border/30 hover:border-brand-primary/50 hover:bg-brand-primary/5 shadow-sm hover:shadow-xl hover:shadow-brand-primary/5"
                       )}
                     >
-                      <div className="flex items-center gap-4 min-w-0 z-10">
-                        <div className={cn(
-                          "size-11 rounded-2xl flex items-center justify-center shrink-0 text-xs font-black transition-all duration-300",
-                          isCurrent 
-                            ? "bg-brand-primary text-brand-bg rotate-12" 
-                            : isRead 
-                              ? "bg-brand-surface-variant/30 text-brand-text-muted/60" 
-                              : "bg-brand-surface-variant/40 text-white group-hover:bg-brand-primary group-hover:text-brand-bg group-hover:-rotate-12"
-                        )}>
-                          {ch.id}
-                        </div>
-                        <div className="flex flex-col min-w-0 pr-4">
-                           <span className={cn(
-                             "text-[13px] font-lexend font-bold truncate transition-colors",
-                             isRead ? "text-brand-text-muted/60 font-normal" : "text-white group-hover:text-brand-primary"
-                           )}>
-                              {ch.title || `Bölüm ${ch.id}`}
-                           </span>
-                           {isCurrent && (
-                             <span className="text-[9px] font-lexend font-bold text-brand-primary uppercase tracking-[0.2em] mt-0.5">Kaldığın Yer</span>
-                           )}
-                        </div>
+                      <div className={cn(
+                        "text-xl sm:text-2xl font-semibold font-lexend transition-transform duration-300 z-10",
+                        isCurrent 
+                          ? "text-brand-primary scale-110" 
+                          : isRead 
+                            ? "text-brand-text-muted/40" 
+                            : "text-white group-hover:text-brand-primary group-hover:scale-110"
+                      )}>
+                        {ch.id}
                       </div>
                       
-                      <div className="shrink-0 z-10 transition-transform group-hover:translate-x-1 duration-300">
-                        {isRead ? (
-                           <div className="size-6 rounded-lg bg-green-500/10 flex items-center justify-center border border-green-500/20">
-                             <Check className="size-3.5 text-green-400" />
-                           </div>
-                        ) : (
-                           <ChevronRight className={cn(
-                             "size-5 transition-colors",
-                             isCurrent ? "text-brand-primary" : "text-brand-text-muted group-hover:text-brand-primary"
-                           )} />
-                        )}
-                      </div>
+                      {isRead && (
+                         <div className="absolute top-2 right-2 size-3 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20 z-10">
+                           <Check className="size-2 text-green-400" strokeWidth={3} />
+                         </div>
+                      )}
 
                       {/* Animated Background Indicator for Current Chapter */}
                       {isCurrent && (
                         <m.div 
                           layoutId="activeChapterGlow"
-                          className="absolute inset-0 bg-brand-primary/5 pointer-events-none"
+                          className="absolute inset-0 bg-brand-primary/10 pointer-events-none"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                         />
