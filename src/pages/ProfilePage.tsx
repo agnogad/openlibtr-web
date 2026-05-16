@@ -361,65 +361,75 @@ export default function ProfilePage({
         </AnimatePresence>
 
         {loadingDownloads ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[...Array(2)].map((_, i) => (
               <div key={`skeleton-${i}`} className="m3-card p-4 h-32 animate-pulse" />
             ))}
           </div>
         ) : downloadedNovels.length === 0 ? (
-          <div className="m3-card p-12 text-center border-dashed">
-            <div className="size-16 bg-brand-surface-variant/20 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Download className="size-8 text-brand-text-muted opacity-30" />
+          <div className="m3-card p-12 text-center border-dashed border-2 border-brand-border/30 bg-transparent flex flex-col items-center justify-center">
+            <div className="size-20 bg-brand-surface-variant/30 rounded-full flex items-center justify-center mb-6 ring-4 ring-brand-surface/50">
+              <Download className="size-10 text-brand-text-muted opacity-40" />
             </div>
-            <p className="text-brand-text-muted font-lexend text-sm">Henüz çevrimdışı okumak için bir novel indirmediniz.</p>
+            <h4 className="text-xl font-lexend font-semibold text-white mb-2">Çevrimdışı Novel Yok</h4>
+            <p className="text-brand-text-muted font-lexend text-sm max-w-sm">Henüz çevrimdışı okumak için bir novel indirmediniz. Kütüphaneden novel indirebilirsiniz.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {downloadedNovels.map((download) => (
               <m.div
                 key={download.slug}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="m3-card p-5 group flex flex-col gap-4 border-2 border-transparent hover:border-brand-primary/20"
+                className="relative group overflow-hidden rounded-[24px] bg-brand-surface border border-brand-border/20 shadow-md flex"
               >
-                <div className="flex gap-4">
-                  <div className="relative shrink-0">
+                {/* Immersive Cover Background */}
+                <div className="absolute inset-0 z-0 opacity-20 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none blur-xl scale-110">
+                  <img src={api.getCoverUrl(download.slug)} alt="" className="size-full object-cover" />
+                </div>
+                
+                <div className="relative z-10 flex w-full p-3 gap-4">
+                  <Link to={`/novel/${download.slug}`} className="relative shrink-0 block">
                     <img 
                       src={api.getCoverUrl(download.slug)} 
                       alt={download.novel.title} 
-                      className="w-20 h-28 object-cover rounded-xl shadow-md border border-brand-border/30"
+                      className="w-24 aspect-[10/14] object-cover rounded-[16px] shadow-xl group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute -top-3 -right-3 bg-brand-primary text-brand-bg rounded-full p-1.5 shadow-lg border-2 border-brand-surface">
-                      <Check className="size-3.5" />
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-brand-bg rounded-full p-1.5 shadow-lg border-2 border-brand-surface z-20">
+                      <Check className="size-3" strokeWidth={3} />
                     </div>
-                  </div>
+                  </Link>
                   
-                  <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <div className="inline-flex items-center gap-1.5 text-[9px] font-lexend font-bold text-green-400 uppercase tracking-widest bg-green-400/10 px-2 py-1 rounded-md w-fit mb-2 border border-green-400/20">
+                  <div className="flex-1 min-w-0 flex flex-col pt-1 pb-2">
+                    <div className="inline-flex items-center gap-1.5 text-[9px] font-lexend font-bold text-green-400 uppercase tracking-widest bg-green-400/10 px-2 py-1 rounded-md w-fit mb-2 border border-green-400/20 backdrop-blur-md">
                        <Download className="size-3" />
-                       Çevrimdışı Okunabilir
+                       İndirildi
                     </div>
-                    <h4 className="font-lexend font-semibold text-white text-base line-clamp-2 mb-1 leading-snug">{download.novel.title}</h4>
-                    <p className="text-[11px] text-brand-text-muted mt-auto flex items-center gap-2">
-                       <Book className="size-3.5" /> {download.config.total_chapters} Bölüm
-                    </p>
+                    <Link to={`/novel/${download.slug}`} className="group-hover:text-brand-primary transition-colors">
+                      <h4 className="font-lexend font-semibold text-white text-base line-clamp-2 leading-snug">{download.novel.title}</h4>
+                    </Link>
+                    
+                    <div className="mt-auto">
+                      <p className="text-[11px] text-brand-text-muted flex items-center gap-2 mb-3">
+                         <Book className="size-3.5" /> {download.config.total_chapters} Bölüm Okumaya Hazır
+                      </p>
+                      <div className="flex items-center gap-2">
+                         <Link 
+                          to={`/novel/${download.slug}`}
+                          className="flex-1 py-2.5 bg-brand-primary/10 text-brand-primary text-xs font-lexend font-bold rounded-xl text-center hover:bg-brand-primary hover:text-brand-bg transition-colors"
+                         >
+                           OKU
+                         </Link>
+                         <button
+                          onClick={() => setPluginsState(prev => ({ ...prev, slugToDelete: download.slug }))}
+                          className="p-2.5 rounded-xl border border-transparent text-brand-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 transition-all bg-brand-surface-variant/30"
+                          title="Sil"
+                         >
+                           <Trash2 className="size-4" />
+                         </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-3 pt-2 mt-auto">
-                   <Link 
-                    to={`/novel/${download.slug}`}
-                    className="flex-1 py-3 bg-brand-surface-variant/30 text-white text-xs font-lexend font-bold rounded-xl text-center hover:bg-brand-primary hover:text-brand-bg transition-colors border border-transparent hover:border-brand-primary"
-                   >
-                     KİTABA GİT
-                   </Link>
-                   <button
-                    onClick={() => setPluginsState(prev => ({ ...prev, slugToDelete: download.slug }))}
-                    className="p-3 rounded-xl border border-brand-border/30 text-brand-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 transition-all"
-                    title="İndirmeyi Klasörden Sil"
-                   >
-                     <Trash2 className="size-4" />
-                   </button>
                 </div>
               </m.div>
             ))}

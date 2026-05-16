@@ -61,100 +61,88 @@ export default function Library({ search, setSearch }: { search: string, setSear
   const paginatedNovels = filteredNovels.slice((page - 1) * pageSize, page * pageSize);
 
   return (
-    <div className="flex flex-col gap-10">
-      {/* Hero / Resume Section */}
-      {resume ? (
-        <m.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className="m3-card p-6 flex flex-col md:flex-row items-center gap-8 bg-brand-primary-container/10">
-            <div className="relative w-28 h-40 rounded-2xl overflow-hidden shadow-lg shrink-0 border border-brand-border/20">
-              <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="size-full object-cover" fetchPriority="high" decoding="async" />
-            </div>
-            
-            <div className="flex-1 text-center md:text-left">
-              <span className="text-[10px] font-lexend font-bold text-brand-primary uppercase tracking-widest mb-2 block">OKUMAYA DEVAM ET</span>
-              <h3 className="text-xl sm:text-2xl font-lexend font-semibold text-white mb-1 line-clamp-1 sm:line-clamp-2">{resume.novelTitle}</h3>
-              <p className="text-sm text-brand-text-muted mb-6">Mevcut Bölüm: {resume.chapterId}</p>
-              
-              <Link 
-                to={`/read/${resume.slug}/${resume.chapterId}`}
-                className="inline-flex items-center gap-3 px-8 py-3 bg-brand-primary text-brand-bg font-lexend font-bold rounded-full shadow-lg hover:brightness-110 active:scale-95 transition-all"
-              >
-                <Play className="size-4 fill-current" />
-                Dönüş Yap
-              </Link>
-            </div>
-          </div>
-        </m.div>
-      ) : (
-        <m.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative m3-card p-8 sm:p-12 overflow-hidden bg-brand-surface border border-brand-primary/20 flex flex-col md:flex-row items-center gap-8 justify-between"
-        >
-          <div className="absolute -top-40 -right-40 size-96 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-40 -left-40 size-96 bg-brand-primary/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="flex flex-col gap-12">
+      {/* Search & Hero Context */}
+      <div className="flex flex-col md:flex-row items-end justify-between gap-6 pt-4">
+        <div className="max-w-2xl">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-lexend font-extrabold text-white mb-4 tracking-[-0.02em] leading-tight">
+            Sonsuz dünyalara<br className="hidden md:block" /> adım atın.
+          </h1>
+          <p className="text-lg text-brand-text-muted max-w-lg font-lexend leading-relaxed mb-8">
+            Binlerce Türkçe light novel ve web novel. Tamamen ücretsiz, açık kaynaklı ve reklamsız okuma deneyimi.
+          </p>
           
-          <div className="relative z-10 flex-1 text-center md:text-left">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-lexend font-extrabold text-white mb-4 tracking-tight leading-tight">
-              Sonsuz dünyalara <br className="hidden md:block" />adım atın.
-            </h1>
-            <p className="text-base text-brand-text-muted max-w-lg mb-8 font-lexend">
-              Binlerce farklı light novel, web novel ve daha fazlası. Tamamen ücretsiz, açık kaynaklı ve reklamsız okuma deneyimi.
-            </p>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-               <button 
-                onClick={() => {
-                  const input = document.getElementById('search-input');
-                  input?.focus();
-                  input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }}
-                className="px-8 py-4 bg-brand-primary text-brand-bg font-lexend font-bold rounded-full shadow-lg hover:brightness-110 active:scale-95 transition-all"
-              >
-                Keşfetmeye Başla
-              </button>
+          <div className="relative group max-w-md">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-brand-text-muted size-5 group-focus-within:text-brand-primary transition-colors duration-300" />
+            <input 
+              id="search-input"
+              type="text"
+              placeholder="Novel kütüphanesinde keşfe çıkın..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-brand-surface-variant/30 border border-brand-border/20 rounded-full py-4 pl-16 pr-6 text-base text-brand-text-main placeholder:text-brand-text-muted/60 focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary/40 focus:bg-brand-surface transition-all font-lexend shadow-inner"
+            />
+          </div>
+        </div>
+
+        {/* Dynamic Resume Card */}
+        {resume && (
+          <m.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="w-full md:w-auto shrink-0"
+          >
+            <div className="relative group overflow-hidden rounded-[32px] bg-brand-surface border border-brand-border/20 p-2 shadow-2xl flex items-center gap-4 hover:border-brand-primary/30 transition-colors w-full sm:w-[380px]">
+              <div className="relative w-24 h-32 rounded-[24px] overflow-hidden shrink-0 shadow-md">
+                <img src={api.getCoverUrl(resume.slug)} alt={resume.novelTitle} className="size-full object-cover transform group-hover:scale-105 transition-transform duration-500" fetchPriority="high" decoding="async" />
+                <div className="absolute inset-0 bg-black/20" />
+              </div>
+              <div className="flex-1 pr-4 py-2">
+                <span className="text-[10px] font-lexend font-bold text-brand-primary uppercase tracking-widest mb-1.5 block">OKUMAYA DEVAM ET</span>
+                <h3 className="text-base font-lexend font-semibold text-white mb-1 line-clamp-2 leading-snug">{resume.novelTitle}</h3>
+                <p className="text-xs text-brand-text-muted mb-4 font-medium">Bölüm {resume.chapterId}</p>
+                <Link 
+                  to={`/read/${resume.slug}/${resume.chapterId}`}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-white text-black font-lexend font-bold text-xs rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all w-full"
+                >
+                  <Play className="size-3.5 fill-current" />
+                  Kaldığın Yerden Dön
+                </Link>
+              </div>
             </div>
-          </div>
-          
-          <div className="relative z-10 hidden md:block shrink-0">
-             <div className="size-48 bg-brand-primary/10 rounded-full flex items-center justify-center border-4 border-brand-primary/30 shadow-2xl relative">
-                <Book className="size-20 text-brand-primary absolute transform -rotate-12" />
-             </div>
-          </div>
-        </m.div>
-      )}
+          </m.div>
+        )}
+      </div>
 
       {/* Favoriler Horizontal List */}
       {bookmarks.length > 0 && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-lexend font-semibold text-white">Favorileriniz</h2>
-            <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{bookmarks.length} NOVEL</span>
+        <div className="mb-2">
+          <div className="flex items-end justify-between mb-6">
+            <h2 className="text-2xl lg:text-3xl font-lexend font-semibold text-white tracking-tight">Favorileriniz</h2>
+            <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest">{bookmarks.length} NOVEL</span>
           </div>
-          <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar snap-x">
+          <div className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 custom-scrollbar snap-x">
             {bookmarks.map((bookmark, idx) => (
               <m.div
                 key={bookmark.slug}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="snap-start shrink-0 w-32 sm:w-40"
+                className="snap-start shrink-0 w-36 sm:w-44"
               >
                 <Link 
                   to={`/novel/${bookmark.slug}`}
                   className="group flex flex-col"
                 >
-                  <div className="m3-card aspect-[10/14] mb-3 overflow-hidden group-hover:-translate-y-2 transition-all duration-300">
+                  <div className="m3-card aspect-[10/14] mb-3 overflow-hidden group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-brand-primary/10 transition-all duration-300 rounded-[24px]">
                     <img 
                       src={api.getCoverUrl(bookmark.slug)} 
                       alt={bookmark.title} 
-                      className="size-full object-cover transform group-hover:scale-110 transition-transform duration-500 ease-out" 
+                      className="size-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out" 
                       loading="lazy"
                     />
                   </div>
-                  <h3 className="font-lexend font-semibold text-sm line-clamp-2 text-white group-hover:text-brand-primary transition-colors leading-tight px-1">
+                  <h3 className="font-lexend font-semibold text-sm line-clamp-2 text-white group-hover:text-brand-primary transition-colors leading-snug px-1">
                     {bookmark.title}
                   </h3>
                 </Link>
@@ -166,24 +154,9 @@ export default function Library({ search, setSearch }: { search: string, setSear
 
       {/* Son Güncellemeler Grid */}
       <div>
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-lexend font-semibold text-white">Son Güncellemeler</h2>
-          <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">{novels.length} TOPLAM</span>
-        </div>
-
-        {/* Search Bar - Repositioned for all screen sizes */}
-        <div className="mb-10 max-w-2xl">
-          <div className="relative group">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-brand-text-muted size-5 group-focus-within:text-brand-primary transition-colors" />
-            <input 
-              id="search-input"
-              type="text"
-              placeholder="Novel kütüphanesinde keşfe çıkın..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-brand-surface-variant/20 border-none rounded-2xl py-4 pl-14 pr-6 text-base text-brand-text-main placeholder:text-brand-text-muted/60 focus:ring-2 focus:ring-brand-primary/20 transition-all font-lexend"
-            />
-          </div>
+        <div className="flex items-end justify-between mb-8">
+          <h2 className="text-2xl lg:text-3xl font-lexend font-semibold text-white tracking-tight">Son Güncellemeler</h2>
+          <span className="text-[11px] font-lexend font-bold text-brand-text-muted uppercase tracking-widest">{novels.length} TOPLAM</span>
         </div>
         
         {loading ? (
