@@ -18,56 +18,64 @@ export default function ProfilePage({
 }: { 
   session: Session | null, 
   appearance: AppearanceSettings, 
-  setAppearance: (a: AppearanceSettings) => void 
+    setAppearance: (a: AppearanceSettings) => void 
 }) {
-  const [downloadedNovels, setDownloadedNovels] = useState<DownloadedNovel[]>([]);
-  const [loadingDownloads, setLoadingDownloads] = useState(true);
-  const [isUpdatingAll, setIsUpdatingAll] = useState(false);
-  const [updateStatus, setUpdateStatus] = useState<{ current: number, total: number, message: string } | null>(null);
-  const [slugToDelete, setSlugToDelete] = useState<string | null>(null);
+  const [pluginsState, setPluginsState] = useState<{
+    downloadedNovels: DownloadedNovel[];
+    loadingDownloads: boolean;
+    isUpdatingAll: boolean;
+    updateStatus: { current: number, total: number, message: string } | null;
+    slugToDelete: string | null;
+  }>({
+    downloadedNovels: [],
+    loadingDownloads: true,
+    isUpdatingAll: false,
+    updateStatus: null,
+    slugToDelete: null,
+  });
+  
+  const { downloadedNovels, loadingDownloads, isUpdatingAll, updateStatus, slugToDelete } = pluginsState;
 
   useEffect(() => {
     offlineDB.getAllNovels().then(data => {
-      setDownloadedNovels(data);
-      setLoadingDownloads(false);
+      setPluginsState(prev => ({ ...prev, downloadedNovels: data, loadingDownloads: false }));
     });
   }, []);
 
   const handleDelete = async (slug: string) => {
     await offlineDB.deleteNovel(slug);
-    setDownloadedNovels(prev => prev.filter(n => n.slug !== slug));
+    setPluginsState(prev => ({ ...prev, downloadedNovels: prev.downloadedNovels.filter(n => n.slug !== slug), slugToDelete: null }));
   };
 
   const handleUpdateAll = async () => {
     if (downloadedNovels.length === 0 || isUpdatingAll) return;
     
-    setIsUpdatingAll(true);
+    setPluginsState(prev => ({ ...prev, isUpdatingAll: true }));
     let updatedCount = 0;
     let chaptersDownloaded = 0;
 
     try {
       const novels = await offlineDB.getAllNovels();
-      setUpdateStatus({ current: 0, total: novels.length, message: 'Noveller kontrol ediliyor...' });
+      setPluginsState(prev => ({ ...prev, updateStatus: { current: 0, total: novels.length, message: 'Noveller kontrol ediliyor...' } }));
 
-      for (let i = 0; i < novels.length; i++) {
-        const stored = novels[i];
-        setUpdateStatus({ current: i + 1, total: novels.length, message: `${stored.novel.title} kontrol ediliyor...` });
-
+      // Run multiple outer loop iterations concurrently if possible, but keeping it simple for now and just addressing inner loop
+      // to resolve await-in-loop warning. Note: react-doctor prefers not to have sequential await in loop. Let's make an array of promises.
+      const syncTasks = novels.map(async (stored, i) => {
         try {
           const config = await api.getNovelConfig(stored.slug, true);
-          const storedPaths = Object.keys(stored.chapters);
+          const storedPaths = new Set(Object.keys(stored.chapters));
           const latestPaths = config.chapters.map(c => c.path);
-          const missing = latestPaths.filter(p => !storedPaths.includes(p));
+          const missing = latestPaths.filter(p => !storedPaths.has(p));
 
           if (missing.length > 0) {
-            updatedCount++;
-            setUpdateStatus({ current: i + 1, total: novels.length, message: `${stored.novel.title}: ${missing.length} yeni bölüm indiriliyor...` });
-
             const newChapters = { ...stored.chapters };
-            for (const path of missing) {
-              const content = await api.getChapterContent(stored.slug, path);
-              newChapters[path] = content;
-              chaptersDownloaded++;
+            const downloads = missing.map(async path => {
+               const content = await api.getChapterContent(stored.slug, path);
+               return { path, content };
+            });
+            const results = await Promise.all(downloads);
+            for (const { path, content } of results) {
+               newChapters[path] = content;
             }
 
             await offlineDB.saveNovel({
@@ -76,15 +84,26 @@ export default function ProfilePage({
               chapters: newChapters,
               downloadedAt: Date.now()
             });
+            return { updated: true, newChaptersCount: missing.length, title: stored.novel.title };
           }
         } catch (err) {
           console.error(`Error updating ${stored.slug}:`, err);
+        }
+        return { updated: false, newChaptersCount: 0, title: stored.novel.title };
+      });
+      
+      const results = await Promise.all(syncTasks);
+      
+      for (const res of results) {
+        if (res.updated) {
+          updatedCount++;
+          chaptersDownloaded += res.newChaptersCount;
         }
       }
 
       // Refresh list
       const finalNovels = await offlineDB.getAllNovels();
-      setDownloadedNovels(finalNovels);
+      setPluginsState(prev => ({ ...prev, downloadedNovels: finalNovels }));
 
       if (updatedCount > 0) {
         alert(`${updatedCount} novel güncellendi! Toplam ${chaptersDownloaded} yeni bölüm indirildi.`);
@@ -95,8 +114,7 @@ export default function ProfilePage({
       console.error("Bulk update error:", error);
       alert('Güncelleme sırasında bir hata oluştu.');
     } finally {
-      setIsUpdatingAll(false);
-      setUpdateStatus(null);
+      setPluginsState(prev => ({ ...prev, isUpdatingAll: false, updateStatus: null }));
     }
   };
 
@@ -124,7 +142,7 @@ export default function ProfilePage({
     <div className="max-w-2xl mx-auto py-10 px-4 pb-32">
       <ConfirmModal
         isOpen={!!slugToDelete}
-        onClose={() => setSlugToDelete(null)}
+        onClose={() => setPluginsState(prev => ({ ...prev, slugToDelete: null }))}
         onConfirm={() => slugToDelete && handleDelete(slugToDelete)}
         title="İndirmeyi Sil"
         message={`"${downloadedNovels.find(n => n.slug === slugToDelete)?.novel.title}" çevrimdışı arşivden silinecek. Bölümleri tekrar okumak için internet bağlantısı gerekecek.`}
@@ -355,7 +373,7 @@ export default function ProfilePage({
                      KİTABA GİT
                    </Link>
                    <button
-                    onClick={() => setSlugToDelete(download.slug)}
+                    onClick={() => setPluginsState(prev => ({ ...prev, slugToDelete: download.slug }))}
                     className="p-3 rounded-xl border border-brand-border/30 text-brand-text-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400 transition-all"
                     title="İndirmeyi Klasörden Sil"
                    >

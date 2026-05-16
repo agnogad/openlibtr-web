@@ -12,21 +12,24 @@ import { tr } from 'date-fns/locale';
 import { ConfirmModal } from '../components/ConfirmModal';
 
 export default function HistoryPage({ session }: { session: Session | null }) {
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<{ history: HistoryItem[], loading: boolean }>({
+    history: [],
+    loading: true
+  });
+  const { history, loading } = state;
   const [isClearAllModalOpen, setIsClearAllModalOpen] = useState(false);
   const [itemToRemove, setItemToRemove] = useState<HistoryItem | null>(null);
 
   useEffect(() => {
     const loadHistory = async () => {
-      setLoading(true);
+      setState(prev => ({ ...prev, loading: true }));
+      let newHistory: HistoryItem[] = [];
       if (session) {
-        const remoteHistory = await syncService.getHistory(session.user.id);
-        setHistory(remoteHistory);
+        newHistory = await syncService.getHistory(session.user.id);
       } else {
-        setHistory(storage.getHistory());
+        newHistory = storage.getHistory();
       }
-      setLoading(false);
+      setState({ history: newHistory, loading: false });
     };
     loadHistory();
   }, [session]);
@@ -40,7 +43,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
     } else {
       storage.clearHistory();
     }
-    setHistory([]);
+    setState(prev => ({ ...prev, history: [] }));
   };
 
   const handleRemoveItem = async (slug: string) => {
@@ -48,7 +51,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
       // Sync service might need a remove method, but let's stick to storage for now
     }
     storage.removeHistoryItem(slug);
-    setHistory(prev => prev.filter(h => h.slug !== slug));
+    setState(prev => ({ ...prev, history: prev.history.filter(h => h.slug !== slug) }));
   };
 
   return (
@@ -156,7 +159,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                         <div className="size-1 rounded-full bg-brand-border/40" />
                         <div suppressHydrationWarning className="flex items-center gap-1.5 text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">
                           <Clock className="size-3" />
-                          {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: tr })}
+                          {formatDistanceToNow(item.timestamp, { addSuffix: true, locale: tr })}
                         </div>
                       </div>
                       <h3 className="text-lg sm:text-xl font-lexend font-semibold text-white group-hover:text-brand-primary transition-colors line-clamp-1 leading-tight mb-2">

@@ -212,7 +212,14 @@ export default function Library({ search, setSearch }: { search: string, setSear
         ) : (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6 sm:gap-8 content-visibility-auto">
-            {paginatedNovels.map((novel, idx) => (
+            {paginatedNovels.map((novel, idx) => {
+              const ts = novel.lastUpdated;
+              const updateDate = new Date(ts);
+              const isToday = updateDate.getDate() === today.getDate() &&
+                             updateDate.getMonth() === today.getMonth() &&
+                             updateDate.getFullYear() === today.getFullYear();
+
+              return (
               <m.div
                 key={novel.slug}
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -239,28 +246,22 @@ export default function Library({ search, setSearch }: { search: string, setSear
                   <h3 className="font-lexend font-semibold text-base line-clamp-1 text-white group-hover:text-brand-primary transition-colors leading-tight mb-1 px-2">
                     {novel.title}
                   </h3>
-                  <p className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide flex items-center gap-2">
+                  <p suppressHydrationWarning className="text-[11px] text-brand-text-muted font-medium px-2 uppercase tracking-wide flex items-center gap-2">
                     <span className="flex items-center gap-1">
                       {novel.chapterCount} Bölüm
                       {downloadedSlugs.includes(novel.slug) && (
                         <Download className="size-2.5 text-green-400" />
                       )}
                     </span>
-                    {(() => {
-                      const updateDate = new Date(novel.lastUpdated);
-                      const isToday = updateDate.getDate() === today.getDate() &&
-                                     updateDate.getMonth() === today.getMonth() &&
-                                     updateDate.getFullYear() === today.getFullYear();
-                      return isToday && (
-                        <span className="px-1.5 py-0.5 bg-brand-primary/20 text-brand-primary text-[9px] font-bold rounded ring-1 ring-brand-primary/30">
-                          GÜNCELLENDİ
-                        </span>
-                      );
-                    })()}
+                    {isToday && (
+                      <span className="px-1.5 py-0.5 bg-brand-primary/20 text-brand-primary text-[9px] font-bold rounded ring-1 ring-brand-primary/30">
+                        GÜNCELLENDİ
+                      </span>
+                    )}
                   </p>
                 </Link>
               </m.div>
-            ))}
+            )})}
           </div>
 
           {totalPages > 1 && (

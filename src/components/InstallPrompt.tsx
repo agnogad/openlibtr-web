@@ -3,9 +3,17 @@ import { Download, X, Share } from 'lucide-react';
 import {  m, AnimatePresence  } from 'motion/react';
 
 export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [isIos, setIsIos] = useState(false);
+  const [state, setState] = useState<{
+    deferredPrompt: any;
+    showPrompt: boolean;
+    isIos: boolean;
+  }>({
+    deferredPrompt: null,
+    showPrompt: false,
+    isIos: false,
+  });
+
+  const { deferredPrompt, showPrompt, isIos } = state;
 
   useEffect(() => {
     // Check if dismissed before
@@ -15,8 +23,7 @@ export default function InstallPrompt() {
     // --- Android / Chrome Logic ---
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e);
-      setShowPrompt(true);
+      setState(prev => ({ ...prev, deferredPrompt: e, showPrompt: true }));
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -27,9 +34,9 @@ export default function InstallPrompt() {
     
     // If it's iOS, not in standalone mode (not installed yet), and we haven't prompted
     if (isIosDevice && !isStandalone) {
-      setIsIos(true);
+      setState(prev => ({ ...prev, isIos: true }));
       // Optional: Add a small delay so it doesn't pop up immediately on first load
-      setTimeout(() => setShowPrompt(true), 3000); 
+      setTimeout(() => setState(prev => ({ ...prev, showPrompt: true })), 3000); 
     }
 
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -42,26 +49,25 @@ export default function InstallPrompt() {
       if (outcome === 'accepted') {
         console.log('User accepted the PWA install');
       }
-      setDeferredPrompt(null);
+      setState(prev => ({ ...prev, deferredPrompt: null }));
     }
     closePrompt();
   };
 
   const closePrompt = () => {
-    setShowPrompt(false);
+    setState(prev => ({ ...prev, showPrompt: false }));
     localStorage.setItem('okuttur-pwa-prompt-dismissed', 'true');
   };
 
-  if (!showPrompt) return null;
-
   return (
     <AnimatePresence>
-      <m.div 
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 50 }}
-        className="fixed bottom-24 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-[100]"
-      >
+      {showPrompt && (
+        <m.div 
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-24 sm:bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-[100]"
+        >
         <div className="m3-card p-5 bg-brand-surface shadow-2xl border border-brand-primary/20 relative overflow-hidden">
           {/* Background Glow */}
           <div className="absolute -top-10 -right-10 size-32 bg-brand-primary/10 rounded-full blur-3xl pointer-events-none" />
@@ -103,6 +109,7 @@ export default function InstallPrompt() {
           </div>
         </div>
       </m.div>
+      )}
     </AnimatePresence>
   );
 }
