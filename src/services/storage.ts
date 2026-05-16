@@ -5,9 +5,19 @@ const RESUME_KEY = 'openlib_resume';
 const READING_SETTINGS_KEY = 'openlib_reading_settings';
 const APPEARANCE_SETTINGS_KEY = 'openlib_appearance_settings';
 const BOOKMARKS_KEY = 'openlib_bookmarks';
+const GITHUB_PROXY_KEY = 'openlib_github_proxy';
 
 export const storage = {
   // ... existing methods ...
+  setGithubProxy: (enabled: boolean) => {
+    localStorage.setItem(GITHUB_PROXY_KEY, JSON.stringify(enabled));
+  },
+
+  getGithubProxy: (): boolean => {
+    const data = localStorage.getItem(GITHUB_PROXY_KEY);
+    return data ? JSON.parse(data) : false;
+  },
+
   saveHistory: (item: HistoryItem) => {
     const history = storage.getHistory();
     // Filter out previous entries for the same novel to avoid duplicates

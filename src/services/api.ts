@@ -1,7 +1,14 @@
 import { Novel, NovelConfig } from '../types';
 import { offlineDB } from './db';
+import { storage } from './storage';
 
-const BASE_URL = 'https://raw.githubusercontent.com/agnogad/openlibtr/main';
+const getBaseUrl = () => {
+  if (storage.getGithubProxy()) {
+    return 'https://cdn.jsdelivr.net/gh/agnogad/openlibtr@refs/heads/main';
+  }
+  return 'https://raw.githubusercontent.com/agnogad/openlibtr/main';
+};
+
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 interface CachedData<T> {
@@ -35,14 +42,14 @@ const fetchWithCache = async <T>(key: string, fetchFn: () => Promise<T>): Promis
 export const api = {
   getLibrary: async (bypassCache = false): Promise<Novel[]> => {
     if (bypassCache) {
-      const response = await fetch(`${BASE_URL}/library.json?t=${Date.now()}`);
+      const response = await fetch(`${getBaseUrl()}/library.json?t=${Date.now()}`);
       if (!response.ok) throw new Error('Could not fetch library');
       const data = await response.json();
       cache['library'] = { timestamp: Date.now(), data };
       return data;
     }
     return fetchWithCache('library', async () => {
-      const response = await fetch(`${BASE_URL}/library.json`);
+      const response = await fetch(`${getBaseUrl()}/library.json`);
       if (!response.ok) throw new Error('Could not fetch library');
       return response.json();
     });
@@ -73,7 +80,7 @@ export const api = {
     }
 
     if (bypassCache) {
-      const response = await fetch(`${BASE_URL}/books/${slug}/config.json?t=${Date.now()}`);
+      const response = await fetch(`${getBaseUrl()}/books/${slug}/config.json?t=${Date.now()}`);
       if (!response.ok) throw new Error('Could not fetch novel config');
       const data = await response.json();
       cache[`config-${slug}`] = { timestamp: Date.now(), data };
@@ -81,7 +88,7 @@ export const api = {
     }
 
     return fetchWithCache(`config-${slug}`, async () => {
-      const response = await fetch(`${BASE_URL}/books/${slug}/config.json`);
+      const response = await fetch(`${getBaseUrl()}/books/${slug}/config.json`);
       if (!response.ok) throw new Error('Could not fetch novel config');
       return response.json();
     });
@@ -95,14 +102,14 @@ export const api = {
     }
 
     return fetchWithCache(`chapter-${slug}-${path}`, async () => {
-      const response = await fetch(`${BASE_URL}/books/${slug}/${path}`);
+      const response = await fetch(`${getBaseUrl()}/books/${slug}/${path}`);
       if (!response.ok) throw new Error('Could not fetch chapter content');
       return response.text();
     });
   },
 
   getCoverUrl: (slug: string): string => {
-    const originalUrl = `${BASE_URL}/books/${slug}/cover.jpg`;
+    const originalUrl = `${getBaseUrl()}/books/${slug}/cover.jpg`;
     return `https://wsrv.nl/?url=${encodeURIComponent(originalUrl)}&w=400&output=webp&q=80&l=9&maxage=1d`;
   }
 };

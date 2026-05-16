@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { User, LogOut, Settings, Check, Book, Trash2, Download, RefreshCw, Loader2 } from 'lucide-react';
+import { User, LogOut, Settings, Check, Book, Trash2, Download, RefreshCw, Loader2, Github } from 'lucide-react';
 import {  m, AnimatePresence  } from 'motion/react';
 import { Session } from '@supabase/supabase-js';
 import { AppearanceSettings } from '../types';
@@ -20,6 +20,7 @@ export default function ProfilePage({
   appearance: AppearanceSettings, 
     setAppearance: (a: AppearanceSettings) => void 
 }) {
+  const [githubProxy, setGithubProxy] = useState(() => storage.getGithubProxy());
   const [pluginsState, setPluginsState] = useState<{
     downloadedNovels: DownloadedNovel[];
     loadingDownloads: boolean;
@@ -254,6 +255,46 @@ export default function ProfilePage({
               ))}
             </div>
           </div>
+        </div>
+
+        {/* Advanced Settings */}
+        <div className="m3-card p-6 mt-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-1.5 rounded-lg bg-brand-surface-variant/20 text-brand-text-main">
+              <Github className="size-5" />
+            </div>
+            <h3 className="text-base font-lexend font-semibold text-white">GitHub Proxy (jsDelivr CDN)</h3>
+          </div>
+          <p className="text-sm text-brand-text-muted mb-4">
+            Eğer serileri yüklerken veya bölüm listesinde sorun yaşıyorsanız, GitHub bağlantısı yerine jsDelivr CDN üzerinden çekilmesini sağlayabilirsiniz. Özellikle Türkiye'den bağlanan bazı kullanıcıların yaşadığı yüklenme sorununu çözer. Seçim yapıldığında uygulama yenilenecektir.
+          </p>
+          <button
+            onClick={() => {
+              const newVal = !githubProxy;
+              setGithubProxy(newVal);
+              storage.setGithubProxy(newVal);
+              window.location.reload();
+            }}
+            className={cn(
+              "flex items-center justify-between w-full p-4 rounded-xl border transition-all",
+              githubProxy
+                ? "border-brand-primary bg-brand-primary/10 text-brand-primary"
+                : "border-brand-border/30 bg-brand-surface-variant/5 text-brand-text-muted hover:border-brand-primary/40"
+            )}
+          >
+            <span className="font-lexend font-medium text-sm">
+              {githubProxy ? 'Proxy Aktif' : 'Proxy Kapalı'}
+            </span>
+            <div className={cn(
+              "w-12 h-6 rounded-full p-1 transition-colors relative",
+              githubProxy ? "bg-brand-primary" : "bg-brand-border"
+            )}>
+              <div className={cn(
+                "w-4 h-4 rounded-full bg-white transition-transform",
+                githubProxy ? "translate-x-6" : "translate-x-0"
+              )} />
+            </div>
+          </button>
         </div>
       </div>
 
