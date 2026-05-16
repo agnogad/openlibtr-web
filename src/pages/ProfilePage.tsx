@@ -304,7 +304,7 @@ export default function ProfilePage({
         {loadingDownloads ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="m3-card p-4 h-32 animate-pulse" />
+              <div key={`skeleton-${i}`} className="m3-card p-4 h-32 animate-pulse" />
             ))}
           </div>
         ) : downloadedNovels.length === 0 ? (

@@ -280,8 +280,8 @@ function DynamicTitle() {
 export default function App() {
   const [search, setSearch] = useState('');
   const [session, setSession] = useState<Session | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
-  const [appearance, setAppearance] = useState<AppearanceSettings>(storage.getAppearanceSettings());
+  const authLoadingRef = React.useRef(true);
+  const [appearance, setAppearance] = useState<AppearanceSettings>(() => storage.getAppearanceSettings());
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
@@ -301,16 +301,16 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setAuthLoading(false);
+      authLoadingRef.current = false;
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (authLoading) setAuthLoading(false);
+      authLoadingRef.current = false;
     });
 
     return () => subscription.unsubscribe();
-  }, [authLoading]);
+  }, []);
 
   return (
     <Router>

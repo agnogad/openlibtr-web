@@ -31,7 +31,7 @@ export default function Reader({ session }: { session: Session | null }) {
   const [config, setConfig] = useState<NovelConfig | null>(null);
   const [chapter, setChapter] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [readerSettings, setReaderSettings] = useState<ReadingSettings>(storage.getReadingSettings());
+  const [readerSettings, setReaderSettings] = useState<ReadingSettings>(() => storage.getReadingSettings());
   const [showSettings, setShowSettings] = useState(false);
   const [showChapters, setShowChapters] = useState(false);
   const [chapterSearch, setChapterSearch] = useState('');
@@ -39,8 +39,8 @@ export default function Reader({ session }: { session: Session | null }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [resumePrompt, setResumePrompt] = useState<{ chapterId: number } | null>(null);
-  const [hasSavedHistory, setHasSavedHistory] = useState(false);
   const quickPageSize = 60;
+  const hasSavedHistory = React.useRef(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,41 +48,38 @@ export default function Reader({ session }: { session: Session | null }) {
       const progress = totalHeight <= 0 ? 100 : (window.scrollY / totalHeight) * 100;
       setScrollProgress(progress);
       setShowBackToTop(window.scrollY > 500);
+
+      if (progress >= 70 && !hasSavedHistory.current && novel && slug && chapterId) {
+        hasSavedHistory.current = true;
+        const currentChapterId = parseInt(chapterId);
+        const historyItem = {
+          slug,
+          novelTitle: novel.title,
+          chapterId: currentChapterId,
+          timestamp: Date.now()
+        };
+        
+        storage.saveHistory(historyItem);
+        storage.saveResume({
+          slug,
+          novelTitle: novel.title,
+          chapterId: currentChapterId
+        });
+
+        if (session) {
+          syncService.saveHistory(session.user.id, historyItem);
+        }
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Save history logic when threshold reached
-  useEffect(() => {
-    if (scrollProgress >= 70 && !hasSavedHistory && novel && slug && chapterId) {
-      setHasSavedHistory(true);
-      const currentChapterId = parseInt(chapterId);
-      const historyItem = {
-        slug,
-        novelTitle: novel.title,
-        chapterId: currentChapterId,
-        timestamp: Date.now()
-      };
-      
-      storage.saveHistory(historyItem);
-      storage.saveResume({
-        slug,
-        novelTitle: novel.title,
-        chapterId: currentChapterId
-      });
-
-      if (session) {
-        syncService.saveHistory(session.user.id, historyItem);
-      }
-    }
-  }, [scrollProgress, hasSavedHistory, novel, slug, chapterId, session]);
+  }, [novel, slug, chapterId, session]);
 
   useEffect(() => {
     if (!slug || !chapterId) return;
     setLoading(true);
-    setHasSavedHistory(false);
+    hasSavedHistory.current = false;
     
     // Check for resume *before* loading new content
     const existingResume = storage.getResume();

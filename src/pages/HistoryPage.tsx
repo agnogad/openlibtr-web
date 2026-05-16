@@ -111,7 +111,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
       {loading ? (
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
-             <div key={i} className="m3-card h-32 animate-pulse" />
+             <div key={`skeleton-${i}`} className="m3-card h-32 animate-pulse" />
           ))}
         </div>
       ) : history.length === 0 ? (
@@ -154,7 +154,7 @@ export default function HistoryPage({ session }: { session: Session | null }) {
                           BÖLÜM {item.chapterId}
                         </span>
                         <div className="size-1 rounded-full bg-brand-border/40" />
-                        <div className="flex items-center gap-1.5 text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">
+                        <div suppressHydrationWarning className="flex items-center gap-1.5 text-[10px] font-lexend font-bold text-brand-text-muted uppercase tracking-wider">
                           <Clock className="size-3" />
                           {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: tr })}
                         </div>

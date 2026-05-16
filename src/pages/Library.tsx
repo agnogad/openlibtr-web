@@ -14,6 +14,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
   const [resume, setResume] = useState<ResumeData | null>(null);
   const [page, setPage] = useState(1);
   const [bookmarks, setBookmarks] = useState<any[]>([]);
+  const [today] = useState(() => new Date());
   const pageSize = 20;
 
   useEffect(() => {
@@ -188,7 +189,7 @@ export default function Library({ search, setSearch }: { search: string, setSear
         {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
             {[...Array(10)].map((_, i) => (
-              <div key={i} className="space-y-4">
+              <div key={`skeleton-${i}`} className="space-y-4">
                 <div className="aspect-[10/14] bg-brand-surface rounded-[28px] animate-pulse" />
                 <div className="h-4 bg-brand-surface rounded-full w-3/4 animate-pulse" />
               </div>
@@ -246,7 +247,6 @@ export default function Library({ search, setSearch }: { search: string, setSear
                       )}
                     </span>
                     {(() => {
-                      const today = new Date();
                       const updateDate = new Date(novel.lastUpdated);
                       const isToday = updateDate.getDate() === today.getDate() &&
                                      updateDate.getMonth() === today.getMonth() &&
